@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../db/client";
 import { User } from "../generated/prisma";
 
-interface AuthenticatedUserRequest<T> extends Request {
+export interface AuthenticatedUserRequest<T> extends Request {
   user: User;
   body: T;
 }

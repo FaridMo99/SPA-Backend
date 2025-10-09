@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import prisma from "../db/client";
+import { AuthenticatedUserRequest } from "./postController";
 
 export async function getAllUser(
-  req: Request,
+  req: AuthenticatedUserRequest<string>,
   res: Response,
   next: NextFunction,
 ) {
@@ -13,7 +14,7 @@ export async function getAllUser(
 }
 
 export async function getUserById(
-  req: Request,
+  req: AuthenticatedUserRequest<string>,
   res: Response,
   next: NextFunction,
 ) {
@@ -32,22 +33,57 @@ export async function getUserById(
 }
 
 export async function deleteUser(
-  req: Request,
+  req: AuthenticatedUserRequest<string>,
   res: Response,
   next: NextFunction,
 ) {
   try {
+    const username = req.params.username;
+    const userId = req.user.id;
+    const user = await prisma.user.findFirst({
+      where: {
+        username,
+        id: userId,
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const deletedUser = await prisma.user.delete({
+      where: { id: userId },
+    });
+    return res.status(200).json(deletedUser);
   } catch (err) {
     next(err);
   }
 }
 
 export async function updateUser(
-  req: Request,
+  req: AuthenticatedUserRequest<string>,
   res: Response,
   next: NextFunction,
 ) {
   try {
+    const username = req.params.username;
+    const userId = req.user.id;
+    const user = await prisma.user.findFirst({
+      where: {
+        username,
+        id: userId,
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+      const updatedUser = await prisma.user.update(
+          {
+              where: { id: userId },
+              data: {
+                  //logic for optional fields that get updated
+              }
+        }
+    )
+    return res.status(200).json(updatedUser);
   } catch (err) {
     next(err);
   }
