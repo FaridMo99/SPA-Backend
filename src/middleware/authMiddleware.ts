@@ -12,7 +12,7 @@ export function validateLogin(req: Request, res: Response, next: NextFunction) {
 export function validateSignup(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const validation = signupSchema.safeParse(req.body);
   if (validation.success) {
@@ -24,6 +24,6 @@ export function validateSignup(
 export function isAuthenticated(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {}
 export function isAuthorized(req: Request, res: Response, next: NextFunction) {}

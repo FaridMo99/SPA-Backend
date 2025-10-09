@@ -15,13 +15,13 @@ interface LoginRequest extends Request {
 export async function login(
   req: LoginRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {}
 
 export async function signup(
   req: SignupRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { username, password, birthdate, email } = req.body;
   try {

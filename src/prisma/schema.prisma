@@ -27,6 +27,18 @@ model User {
   comments       Comment[]   
   likedPosts     Post[]   @relation("PostLikes")
   likedComments  Comment[] @relation("CommentLikes")
+  followers      Follow[] @relation("UserFollowers")   
+  following      Follow[] @relation("UserFollowing") 
+
+}
+
+
+model Follow {
+  followerId  String
+  followingId String
+  follower    User @relation("UserFollowers", fields: [followerId], references: [id], map: "fk_follow_follower")
+  following   User @relation("UserFollowing", fields: [followingId], references: [id], map: "fk_follow_following")
+  @@id([followerId, followingId])
 }
 
 model Post {
