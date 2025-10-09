@@ -1,52 +1,51 @@
 import express, { NextFunction, Request, Response } from "express";
-import dotenv from "dotenv"
-import cors from "cors"
-import authRouter from "./routes/auth"
-import usersRouter from "./routes/users";
-import postsRouter from "./routes/posts";
+import dotenv from "dotenv";
+import cors from "cors";
+import authRouter from "./src/routes/auth";
+import usersRouter from "./src/routes/users";
+import postsRouter from "./src/routes/posts";
+import commentsRouter from "./src/routes/comments";
+import { disconnectAllServices } from "./src/lib/disconnectHandler";
 
-dotenv.config()
+dotenv.config();
 
-const PORT = process.env.PORT
+const PORT = process.env.NODE_PORT;
 
-const app = express()
+const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors({
-    origin:[process.env.CLIENT_ORIGIN ?? "http://localhost:5173"]
-}))
+app.use(
+  cors({
+    origin: [process.env.CLIENT_ORIGIN ?? "http://localhost:5173"],
+  })
+);
 
-app.use("/auth", authRouter)
-app.use("/users", usersRouter)
-app.use("/posts", postsRouter)
-app.use("/comments", postsRouter);
+app.use("/auth", authRouter);
+app.use("/users", usersRouter);
+app.use("/posts", postsRouter);
+app.use("/comments", commentsRouter);
 
-
-app.use((err:Error, req:Request, res:Response, next:NextFunction) => {
-  console.error(err.stack); 
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
   res.status(500).json({ error: "Something went wrong" });
 });
 
-
-const server = app.listen(PORT, () => {
-    console.log("Server is Running")
-})
-
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  server.close(() => {
-    console.log("Closing server");
-    process.exit(1);
-  });
+export const server = app.listen(PORT, () => {
+  console.log("Server is Running");
 });
 
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err);
-  server.close(() => {
-    console.log("Closing server");
-    process.exit(1);
-  });
+process.on("uncaughtException", async (err: Error) => {
+  await disconnectAllServices("Uncaught Exception:", err);
+});
+process.on("unhandledRejection", async (err: Error) => {
+  await disconnectAllServices("Unhandled Rejection:", err);
+});
+process.on("SIGINT", async () => {
+  await disconnectAllServices("SIGINT");
+});
+process.on("SIGTERM", async () => {
+  await disconnectAllServices("SIGTERM");
 });
 
 //add restart behavior and solution

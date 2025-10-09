@@ -11,4 +11,8 @@ usersRouter.get("/:username", isAuthenticated, (req, res, next) => {
     
 });
 
+usersRouter.delete("/:username", isAuthenticated, (req, res, next) => {});
+
+usersRouter.patch("/:username", isAuthenticated, (req, res, next) => { });
+
 export default usersRouter;
