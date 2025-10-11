@@ -9,13 +9,14 @@ import { disconnectAllServices } from "./src/lib/disconnectHandler";
 import session from "express-session";
 import passport from "./src/lib/passportConfig";
 import redis from "./src/cache/redis";
-import connectRedis from "connect-redis";
+import * as connectRedis from "connect-redis";
 
 dotenv.config();
 const PORT = process.env.NODE_PORT;
 const app = express();
 
 //basic middleware
+//adds req.body only for put,patch,post
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -25,17 +26,17 @@ app.use(
 );
 
 //session middleware
-const RedisStore = connectRedis.default(session);
-const redisStore = new RedisStore({
+const redisStore = new connectRedis.RedisStore({
   client: redis,
 });
-
+//adds. req.session with properties i set up here
 app.use(
   session({
     store: redisStore,
     secret: process.env.SESSION_SECRET ?? "ijfeawjiijn322489r3uogrebhou",
     resave: false,
     saveUninitialized: false,
+    name: "session",
     cookie: {
       httpOnly: true,
       path: "/",
@@ -44,19 +45,21 @@ app.use(
     },
   }),
 );
+//adds req.login(), req.logout(), req.isAuthenticated(), req.isUnauthenticated()
 app.use(passport.initialize());
+//adds req.user through express.session() and deserializes the user if session exists
 app.use(passport.session());
 
-//route middlware
+//route middleware
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/comments", commentsRouter);
 
-//global error handler
+//global error handler middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong" });
+  return res.status(500).json({ error: "Something went wrong" });
 });
 
 export const server = app.listen(PORT, () => {
@@ -78,6 +81,3 @@ process.on("SIGTERM", async () => {
 });
 
 //add restart behavior and solution
-//check if all error handling is correct
-//close conenctions on shutdown
-//check if my try catches use the global middleware

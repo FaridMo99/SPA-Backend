@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated } from "../middleware/authMiddleware";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
 import {
   createPost,
   deletePost,
@@ -15,9 +15,9 @@ postsRouter.get("/:postId", isAuthenticated, getPostByPostId);
 
 postsRouter.post("/", isAuthenticated, createPost);
 
-postsRouter.delete("/", isAuthenticated, deletePost);
+postsRouter.delete("/:postId", isAuthenticated, isAuthorized, deletePost);
 
-postsRouter.patch("/", isAuthenticated, toggleLike);
+postsRouter.patch("/:postId", isAuthenticated, isAuthorized, toggleLike);
 
 export default postsRouter;
 

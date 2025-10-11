@@ -22,3 +22,5 @@ export const loginSchema = z.object({
 });
 
 export const postSchema = z.object({});
+
+export const commentSchema = z.object({});

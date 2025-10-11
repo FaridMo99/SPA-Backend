@@ -3,6 +3,10 @@ import bcrypt from "bcrypt";
 import z from "zod";
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, signupSchema } from "../schemas/schemas";
+import { Session } from "express-session";
+import passport from "../lib/passportConfig";
+import { User } from "../generated/prisma";
+import { AuthenticatedRequest } from "../types/types";
 
 interface SignupRequest extends Request {
   body: z.infer<typeof signupSchema>;
@@ -12,11 +16,24 @@ interface LoginRequest extends Request {
   body: z.infer<typeof loginSchema>;
 }
 
+interface LogoutRequest extends Request {
+  session: Session;
+}
+
 export async function login(
   req: LoginRequest,
   res: Response,
   next: NextFunction,
-) {}
+) {
+  passport.authenticate("local", (err: Error, user: User, info: any) => {
+    if (err) return next(err);
+    req.login(user, (loginErr) => {
+      if (loginErr) return next(loginErr);
+      //check if i should send message or user object
+      return res.status(200).json({ message: "Login successful" });
+    });
+  })(req, res, next);
+}
 
 export async function signup(
   req: SignupRequest,
@@ -37,18 +54,38 @@ export async function signup(
         .json({ message: "Username or Email already taken" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = prisma.user.create({
+    const newUser = await prisma.user.create({
       data: { username, email, birthdate, password: hashedPassword },
     });
-    //create session here and login user
-    return res.status(201).json({
-      /*fill here */
+
+    //create session
+    req.login(newUser, (err) => {
+      if (err) {
+        return next(err);
+      }
+      //check if i should send message or user object
+      return res.status(201).json({
+        message: "Account creation and login successful",
+      });
     });
   } catch (err) {
     next(err);
   }
 }
 
-export async function logout(req: Request, res: Response, next: NextFunction) {
-  //make schema and interface for it
+export function logout(
+  req: AuthenticatedRequest<{}>,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.session) {
+    return res.status(400).json({ message: "User already logged out" });
+  }
+  req.session.destroy((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.clearCookie("session");
+    return res.status(200).json({ message: "Successfully logged out" });
+  });
 }

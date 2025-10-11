@@ -9,4 +9,3 @@ authRouter.post("/signup", validateSignup, signup);
 authRouter.post("/logout", logout);
 
 export default authRouter;
-//signup no duplicate usernames, check that

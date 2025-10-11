@@ -16,7 +16,8 @@ const verify: VerifyFunction = async (email, password, done) => {
     const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      //not specifying password is wrong, is on purpose for security reasons
+      //not specifying that only password is wrong,
+      //is on purpose for security reasons
       return done(null, false, { message: "Email or Password is wrong" });
     }
 

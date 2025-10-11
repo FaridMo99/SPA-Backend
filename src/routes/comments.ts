@@ -1,31 +1,40 @@
-import { Router } from "express";
-import { isAuthenticated } from "../middleware/authMiddleware";
+import { Request, Response, NextFunction, Router } from "express";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
+import {
+  createComment,
+  deleteComment,
+  getAllCommentsByPostId,
+  getSingleCommentByPostIdAndCommentId,
+  toggleLikeComment,
+} from "../controller/commentController";
 
 const commentsRouter = Router();
 
-commentsRouter.get("/:postId", isAuthenticated, (req, res, next) => {});
+//get all comments
+commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
 
+//get single comment
 commentsRouter.get(
   "/:postId/:commentId",
   isAuthenticated,
-  (req, res, next) => {},
+  getSingleCommentByPostIdAndCommentId,
 );
 
 //create comment
-commentsRouter.post("/:postId", isAuthenticated, (req, res, next) => {});
+commentsRouter.post("/:postId", isAuthenticated, isAuthorized, createComment);
 
-//like/dislike comment
-commentsRouter.patch("/:postId", isAuthenticated, (req, res, next) => {});
-
-//comment on comment
-commentsRouter.post(
+//delete comment
+commentsRouter.delete(
   "/:postId/:commentId",
   isAuthenticated,
-  (req, res, next) => {},
+  isAuthorized,
+  deleteComment,
 );
+
+//like/dislike comment
+commentsRouter.patch("/:postId/:commentId", isAuthenticated, toggleLikeComment);
 
 export default commentsRouter;
 
-//check if isauthed or isauthz makes more sense
-//check how you handle commenting on comments like infinitely
-//add also commenting with images/gifs
+//add commenting with images/gifs
+//middleware for all routes to avoid duplicate code inside

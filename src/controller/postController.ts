@@ -7,23 +7,51 @@ export interface AuthenticatedUserRequest<T> extends Request {
   body: T;
 }
 
+function postObjectStructure(userId: string) {
+  const postObject = {
+    id: true,
+    content: true,
+    createdAt: true,
+    user: {
+      select: {
+        username: true,
+        profilePicture: true,
+      },
+    },
+    _count: {
+      select: {
+        likedBy: true,
+      },
+    },
+    likedBy: {
+      where: { id: userId },
+      select: { id: true },
+    },
+  };
+
+  return postObject;
+}
+
 export async function createPost(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedUserRequest<{ content: string }>,
   res: Response,
   next: NextFunction,
 ) {
   const userId = req.user.id;
-  const content = req.body;
+  const content = req.body.content;
   try {
-    const post = await prisma.post.create({ data: { userId, content } });
+    const post = await prisma.post.create({
+      data: { userId, content },
+      select: postObjectStructure(userId),
+    });
     return res.status(201).json(post);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
 export async function deletePost(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
@@ -31,29 +59,20 @@ export async function deletePost(
   const userId = req.user.id;
 
   try {
-    const post = await prisma.post.findFirst({
-      where: {
-        id: postId,
-        userId: userId,
-      },
-    });
-    if (!post) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
     const deletedPost = await prisma.post.delete({
       where: {
         id: postId,
       },
+      select: postObjectStructure(userId),
     });
     return res.status(200).json(deletedPost);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
 export async function toggleLike(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
@@ -71,7 +90,6 @@ export async function toggleLike(
     }
 
     const alreadyLiked = post.likedBy.length > 0;
-
     const updatedPost = await prisma.post.update({
       where: { id: postId },
       data: {
@@ -79,44 +97,99 @@ export async function toggleLike(
           ? { disconnect: { id: userId } }
           : { connect: { id: userId } },
       },
+      select: postObjectStructure(userId),
     });
-
     return res.status(200).json(updatedPost);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
 export async function getPostByPostId(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const postId = req.params.postId;
-    const post = await prisma.post.findFirst({
+    const userId = req.user.id;
+    const post = await prisma.post.findUnique({
       where: { id: postId },
+      select: postObjectStructure(userId),
     });
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
     return res.status(200).json(post);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-export async function getAllPostsByUserId(
-  req: AuthenticatedUserRequest<string>,
+export async function getAllUserPostsByUserId(
+  req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
-) {}
+) {
+  const userId = req.user.id;
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        userId,
+      },
+      select: postObjectStructure(userId),
+      orderBy: { createdAt: "desc" },
+    });
+    return res.status(200).json(posts);
+  } catch (err) {
+    return next(err);
+  }
+}
 
-export async function getAllPostsByFollow() {}
+export async function getAllPostsByFollow(
+  req: AuthenticatedUserRequest<{}>,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user.id;
 
-export async function getRandomPosts() {
-  //for fyp, should not show duplicates,
-  //pagination for infinite scrolling
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        /////////________-------______/////////
+      },
+    });
+    return res.status(200).json(posts);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function getRandomPosts(
+  req: AuthenticatedUserRequest<{ seenIds?: string[] }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const seenIds = req.body.seenIds;
+  const userId = req.user.id;
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        id: {
+          notIn: seenIds ?? [],
+        },
+      },
+      select: postObjectStructure(userId),
+      take: 20,
+      orderBy: { createdAt: "desc" },
+    });
+    return res.status(200).json(posts);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 //interface type kinda wrong since not all get body, fix that
+//add likedby and if liked by the one requesting as fields, update type and return to user all fields
+//change to maybe only return arrays even if no item or only 1, in general look how to structure returns like message object etc.

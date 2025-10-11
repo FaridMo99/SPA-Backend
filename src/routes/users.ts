@@ -1,14 +1,17 @@
 import { Router } from "express";
-import { isAuthenticated } from "../middleware/authMiddleware";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
+import {
+  deleteUser,
+  getUserByUsername,
+  updateUser,
+} from "../controller/userController";
 
 const usersRouter = Router();
 
-usersRouter.get("/", isAuthenticated, (req, res, next) => {});
+usersRouter.get("/:username", isAuthenticated, getUserByUsername);
 
-usersRouter.get("/:username", isAuthenticated, (req, res, next) => {});
+usersRouter.delete("/:username", isAuthenticated, isAuthorized, deleteUser);
 
-usersRouter.delete("/:username", isAuthenticated, (req, res, next) => {});
-
-usersRouter.patch("/:username", isAuthenticated, (req, res, next) => {});
+usersRouter.patch("/:username", isAuthenticated, isAuthorized, updateUser);
 
 export default usersRouter;
