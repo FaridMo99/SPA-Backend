@@ -1,5 +1,7 @@
+import dotenv from "dotenv"
+import chalk from "chalk"
+dotenv.config()
 import express, { NextFunction, Request, Response } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import authRouter from "./src/routes/auth";
 import usersRouter from "./src/routes/users";
@@ -10,19 +12,21 @@ import session from "express-session";
 import passport from "./src/lib/passportConfig";
 import redis from "./src/cache/redis";
 import * as connectRedis from "connect-redis";
+import filesRouter from "./src/routes/files";
+import gifsRouter from "./src/routes/gifs";
 
-dotenv.config();
 const PORT = process.env.NODE_PORT;
 const app = express();
 
-//basic middleware
+//basic middleware 
 //adds req.body only for put,patch,post
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
     origin: [process.env.CLIENT_ORIGIN ?? "http://localhost:5173"],
-  }),
+    credentials:true
+  })
 );
 
 //session middleware
@@ -38,32 +42,37 @@ app.use(
     saveUninitialized: false,
     name: "session",
     cookie: {
+      secure: process.env.NODE_ENV === "dev" ? false : true,
       httpOnly: true,
       path: "/",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
-  }),
+  })
 );
 //adds req.login(), req.logout(), req.isAuthenticated(), req.isUnauthenticated()
 app.use(passport.initialize());
 //adds req.user through express.session() and deserializes the user if session exists
 app.use(passport.session());
 
+
 //route middleware
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/comments", commentsRouter);
+app.use("/files", filesRouter);
+app.use("/gifs", gifsRouter);
 
 //global error handler middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log(chalk.red(`Global Error Middleware: ${err.stack}`))
   console.error(err.stack);
   return res.status(500).json({ error: "Something went wrong" });
 });
 
 export const server = app.listen(PORT, () => {
-  console.log("Server is Running");
+  console.log(chalk.green("Server is Running"));
 });
 
 //process crash handler
@@ -79,5 +88,3 @@ process.on("SIGINT", async () => {
 process.on("SIGTERM", async () => {
   await disconnectAllServices("SIGTERM");
 });
-
-//add restart behavior and solution

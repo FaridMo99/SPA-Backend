@@ -7,13 +7,14 @@ import { Comment } from "../generated/prisma";
 
 function commentObjectStructure(
   userId: string,
-  commentIdentifiers: Partial<Comment>,
+  commentIdentifiers: Partial<Comment>
 ) {
   const commentObject = {
     where: {
       ...commentIdentifiers,
     },
     select: {
+      id:true,
       content: true,
       createdAt: true,
       user: {
@@ -39,7 +40,7 @@ function commentObjectStructure(
 export async function getAllCommentsByPostId(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -58,7 +59,7 @@ export async function getAllCommentsByPostId(
 export async function getSingleCommentByPostIdAndCommentId(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -66,7 +67,7 @@ export async function getSingleCommentByPostIdAndCommentId(
 
   try {
     const comment = await prisma.comment.findFirst(
-      commentObjectStructure(userId, { postId, id: commentId }),
+      commentObjectStructure(userId, { postId, id: commentId })
     );
     if (!comment) {
       return res.status(404).json({ message: "Comment not Found" });
@@ -80,7 +81,7 @@ export async function getSingleCommentByPostIdAndCommentId(
 export async function createComment(
   req: AuthenticatedUserRequest<{ content: string }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -104,7 +105,7 @@ export async function createComment(
 export async function deleteComment(
   req: AuthenticatedUserRequest<Comment>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user.id;
   const commentId = req.params.commentId;
@@ -120,34 +121,69 @@ export async function deleteComment(
   }
 }
 
-export async function toggleLikeComment(
+
+export async function likeComment(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user.id;
+  const postId = req.params.postId; 
   const commentId = req.params.commentId;
 
   try {
     const comment = await prisma.comment.findFirst({
-      where: { id: commentId },
-      include: { likedBy: { where: { id: userId } } },
+      where: { id: commentId, postId: postId },
     });
 
     if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res
+        .status(404)
+        .json({ message: "Comment not found on this post" });
     }
-
-    const alreadyLiked = comment.likedBy.length > 0;
     const updatedComment = await prisma.comment.update({
       where: { id: commentId },
       data: {
-        likedBy: alreadyLiked
-          ? { disconnect: { id: userId } }
-          : { connect: { id: userId } },
+        likedBy: { connect: { id: userId } },
       },
       select: commentObjectStructure(userId, { id: commentId }).select,
     });
+
+    return res.status(200).json(updatedComment);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+
+export async function dislikeComment(
+  req: AuthenticatedUserRequest<{}>,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user.id;
+  const postId = req.params.postId;
+  const commentId = req.params.commentId;
+
+  try {
+    const comment = await prisma.comment.findFirst({
+      where: { id: commentId, postId: postId },
+    });
+
+    if (!comment) {
+      return res
+        .status(404)
+        .json({ message: "Comment not found on this post" });
+    }
+
+    const updatedComment = await prisma.comment.update({
+      where: { id: commentId },
+      data: {
+        likedBy: { disconnect: { id: userId } },
+      },
+      select: commentObjectStructure(userId, { id: commentId }).select,
+    });
+
     return res.status(200).json(updatedComment);
   } catch (err) {
     return next(err);

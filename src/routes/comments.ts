@@ -3,15 +3,18 @@ import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
 import {
   createComment,
   deleteComment,
+  dislikeComment,
   getAllCommentsByPostId,
   getSingleCommentByPostIdAndCommentId,
-  toggleLikeComment,
+  likeComment,
 } from "../controller/commentController";
 
 const commentsRouter = Router();
 
-//get all comments
-commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
+
+commentsRouter.post("/:postId/:commentId/like", isAuthenticated, isAuthorized, likeComment);
+
+commentsRouter.delete("/:postId/:commentId/dislike", isAuthenticated, isAuthorized, dislikeComment);
 
 //get single comment
 commentsRouter.get(
@@ -19,9 +22,6 @@ commentsRouter.get(
   isAuthenticated,
   getSingleCommentByPostIdAndCommentId,
 );
-
-//create comment
-commentsRouter.post("/:postId", isAuthenticated, isAuthorized, createComment);
 
 //delete comment
 commentsRouter.delete(
@@ -31,8 +31,12 @@ commentsRouter.delete(
   deleteComment,
 );
 
-//like/dislike comment
-commentsRouter.patch("/:postId/:commentId", isAuthenticated, toggleLikeComment);
+//get all comments
+commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
+
+//create comment
+commentsRouter.post("/:postId", isAuthenticated, isAuthorized, createComment);
+
 
 export default commentsRouter;
 

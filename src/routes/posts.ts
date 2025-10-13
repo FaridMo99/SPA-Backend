@@ -3,21 +3,33 @@ import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
 import {
   createPost,
   deletePost,
+  getAllPostsByFollow,
+  getAllPostsByUsername,
   getPostByPostId,
-  toggleLike,
+  getRandomPosts,
+  like,
+  unlike,
 } from "../controller/postController";
 
 const postsRouter = Router();
 
-postsRouter.get("/", isAuthenticated, (req, res, next) => {});
-
-postsRouter.get("/:postId", isAuthenticated, getPostByPostId);
 
 postsRouter.post("/", isAuthenticated, createPost);
 
+postsRouter.get("/follow", isAuthenticated, getAllPostsByFollow);
+
+//has to be post request since it needs the seenids in the body, search params and cookies cant hold enough data
+postsRouter.get("/fyp", isAuthenticated, getRandomPosts);
+
+postsRouter.get("/:username/posts", isAuthenticated, getAllPostsByUsername);
+
+postsRouter.post("/:postId/like", isAuthenticated, isAuthorized, like);
+
+postsRouter.delete("/:postId/like", isAuthenticated, isAuthorized, unlike);
+
 postsRouter.delete("/:postId", isAuthenticated, isAuthorized, deletePost);
 
-postsRouter.patch("/:postId", isAuthenticated, isAuthorized, toggleLike);
+postsRouter.get("/:postId", isAuthenticated, getPostByPostId);
 
 export default postsRouter;
 

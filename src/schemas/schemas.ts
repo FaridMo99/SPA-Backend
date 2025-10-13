@@ -20,7 +20,3 @@ export const loginSchema = z.object({
   email: z.email().nonempty("Field is required"),
   password: z.string().min(8).max(20),
 });
-
-export const postSchema = z.object({});
-
-export const commentSchema = z.object({});

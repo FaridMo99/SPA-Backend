@@ -21,6 +21,7 @@ function postObjectStructure(userId: string) {
     _count: {
       select: {
         likedBy: true,
+        comments:true
       },
     },
     likedBy: {
@@ -71,7 +72,7 @@ export async function deletePost(
   }
 }
 
-export async function toggleLike(
+export async function like(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
@@ -90,13 +91,47 @@ export async function toggleLike(
     }
 
     const alreadyLiked = post.likedBy.length > 0;
+    if (alreadyLiked) {
+      return res.status(400).json({ message: "Already liked" });
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id: postId },
-      data: {
-        likedBy: alreadyLiked
-          ? { disconnect: { id: userId } }
-          : { connect: { id: userId } },
-      },
+      data: { likedBy: { connect: { id: userId } } },
+      select: postObjectStructure(userId),
+    });
+    return res.status(200).json(updatedPost);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function unlike(
+  req: AuthenticatedUserRequest<{}>,
+  res: Response,
+  next: NextFunction,
+) {
+  const postId = req.params.postId;
+  const userId = req.user.id;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { likedBy: { where: { id: userId } } },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const alreadyNotLiked = post.likedBy.length === 0;
+    if (alreadyNotLiked) {
+      return res.status(400).json({ message: "Already not liked" });
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: { likedBy: { disconnect: { id: userId } } },
       select: postObjectStructure(userId),
     });
     return res.status(200).json(updatedPost);
@@ -115,7 +150,7 @@ export async function getPostByPostId(
     const userId = req.user.id;
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: postObjectStructure(userId),
+      select: postObjectStructure(userId)
     });
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -126,16 +161,19 @@ export async function getPostByPostId(
   }
 }
 
-export async function getAllUserPostsByUserId(
+export async function getAllPostsByUsername(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user.id
+  const username = req.params.username
   try {
     const posts = await prisma.post.findMany({
       where: {
-        userId,
+        user: {
+          username
+        }
       },
       select: postObjectStructure(userId),
       orderBy: { createdAt: "desc" },
@@ -166,22 +204,21 @@ export async function getAllPostsByFollow(
 }
 
 export async function getRandomPosts(
-  req: AuthenticatedUserRequest<{ seenIds?: string[] }>,
+  req: AuthenticatedUserRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const seenIds = req.body.seenIds;
   const userId = req.user.id;
+
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+
 
   try {
     const posts = await prisma.post.findMany({
-      where: {
-        id: {
-          notIn: seenIds ?? [],
-        },
-      },
       select: postObjectStructure(userId),
-      take: 20,
+      take: limit,
+      skip: limit * (page - 1),
       orderBy: { createdAt: "desc" },
     });
     return res.status(200).json(posts);

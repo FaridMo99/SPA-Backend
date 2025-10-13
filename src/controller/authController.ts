@@ -7,6 +7,8 @@ import { Session } from "express-session";
 import passport from "../lib/passportConfig";
 import { User } from "../generated/prisma";
 import { AuthenticatedRequest } from "../types/types";
+import chalk from "chalk";
+import { createSafeUser, UserWithFollowCount } from "./userController";
 
 interface SignupRequest extends Request {
   body: z.infer<typeof signupSchema>;
@@ -25,12 +27,19 @@ export async function login(
   res: Response,
   next: NextFunction,
 ) {
-  passport.authenticate("local", (err: Error, user: User, info: any) => {
+  console.log("hit login endpoint", req.body)
+  passport.authenticate("local", (err: Error, user:UserWithFollowCount, info: any) => {
     if (err) return next(err);
+        if (!user) {
+          console.log(info.message);
+          return res
+            .status(401)
+            .json({ message: info.message });
+        }
     req.login(user, (loginErr) => {
       if (loginErr) return next(loginErr);
-      //check if i should send message or user object
-      return res.status(200).json({ message: "Login successful" });
+      //fix so it sends correct user type
+      return res.status(200).json(createSafeUser(user));
     });
   })(req, res, next);
 }
@@ -40,14 +49,16 @@ export async function signup(
   res: Response,
   next: NextFunction,
 ) {
+  console.log(chalk.blue(`Hit signup endpoint: ${req.body}`))
   const { username, password, birthdate, email } = req.body;
+  const formattedBirthDate = new Date(birthdate)
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ username }, { email }],
       },
     });
-
+    console.log(chalk.bgCyan(`does user exist:${!!existingUser}`))
     if (existingUser) {
       return res
         .status(409)
@@ -55,18 +66,31 @@ export async function signup(
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
-      data: { username, email, birthdate, password: hashedPassword },
+      data: {
+        username,
+        email,
+        birthdate: formattedBirthDate,
+        password: hashedPassword,
+      },
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
     });
 
     //create session
     req.login(newUser, (err) => {
+      console.log(chalk.magenta("creating session for:" + newUser))
       if (err) {
+      console.log(chalk.red("creating session for:" + newUser + "failed"));
         return next(err);
       }
-      //check if i should send message or user object
-      return res.status(201).json({
-        message: "Account creation and login successful",
-      });
+      console.log(chalk.green("creating session for:" + newUser + "successful"));
+      return res.status(201).json(createSafeUser(newUser));
     });
   } catch (err) {
     next(err);
@@ -78,6 +102,7 @@ export function logout(
   res: Response,
   next: NextFunction,
 ) {
+  console.log(chalk.yellow("User logging out..."))
   if (!req.session) {
     return res.status(400).json({ message: "User already logged out" });
   }
@@ -86,6 +111,39 @@ export function logout(
       return next(err);
     }
     res.clearCookie("session");
+    console.log(chalk.green("User logged out successfully"))
     return res.status(200).json({ message: "Successfully logged out" });
   });
+}
+
+export async function checkUser(
+  req: AuthenticatedRequest<{}>,
+  res: Response,
+  next: NextFunction
+) {
+  const id = req.user?.id
+
+    if (!id) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  try {
+    const user = await prisma.user.findFirst({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+    return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(createSafeUser(user));
+  } catch (err) {
+    next(err)
+  }
 }
