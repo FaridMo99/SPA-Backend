@@ -5,7 +5,9 @@ import {
   follow,
   getFollowers,
   getFollowing,
+  getFullUser,
   getUserByUsername,
+  isFollowing,
   searchUsers,
   unfollow,
   updateUser,
@@ -13,10 +15,13 @@ import {
 
 const usersRouter = Router();
 
+usersRouter.get("/user",isAuthenticated, isAuthorized, getFullUser)
 
 usersRouter.get("/:username/following", isAuthenticated, getFollowing);
 
 usersRouter.get("/:username/followers", isAuthenticated, getFollowers);
+
+usersRouter.get("/:username/mutual", isAuthenticated, isFollowing);
 
 usersRouter.post("/:username/follow", isAuthenticated, follow);
 

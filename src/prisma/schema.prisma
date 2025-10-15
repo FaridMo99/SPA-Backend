@@ -36,8 +36,8 @@ model User {
 model Follow {
   followerId  String
   followingId String
-  follower    User @relation("UserFollowers", fields: [followerId], references: [id], map: "fk_follow_follower", onDelete: Cascade)
-  following   User @relation("UserFollowing", fields: [followingId], references: [id], map: "fk_follow_following", onDelete: Cascade)
+  follower    User @relation("UserFollowing", fields: [followerId], references: [id], map: "fk_follow_follower", onDelete: Cascade)
+  following   User @relation("UserFollowers", fields: [followingId], references: [id], map: "fk_follow_following", onDelete: Cascade)
   @@id([followerId, followingId])
 }
 

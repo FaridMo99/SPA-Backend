@@ -14,7 +14,7 @@ const commentsRouter = Router();
 
 commentsRouter.post("/:postId/:commentId/like", isAuthenticated, isAuthorized, likeComment);
 
-commentsRouter.delete("/:postId/:commentId/dislike", isAuthenticated, isAuthorized, dislikeComment);
+commentsRouter.delete("/:postId/:commentId/like", isAuthenticated, isAuthorized, dislikeComment);
 
 //get single comment
 commentsRouter.get(
@@ -35,7 +35,7 @@ commentsRouter.delete(
 commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
 
 //create comment
-commentsRouter.post("/:postId", isAuthenticated, isAuthorized, createComment);
+commentsRouter.post("/:postId", isAuthenticated, createComment);
 
 
 export default commentsRouter;

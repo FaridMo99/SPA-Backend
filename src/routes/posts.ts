@@ -18,14 +18,13 @@ postsRouter.post("/", isAuthenticated, createPost);
 
 postsRouter.get("/follow", isAuthenticated, getAllPostsByFollow);
 
-//has to be post request since it needs the seenids in the body, search params and cookies cant hold enough data
 postsRouter.get("/fyp", isAuthenticated, getRandomPosts);
 
 postsRouter.get("/:username/posts", isAuthenticated, getAllPostsByUsername);
 
-postsRouter.post("/:postId/like", isAuthenticated, isAuthorized, like);
+postsRouter.post("/:postId/like", isAuthenticated, like);
 
-postsRouter.delete("/:postId/like", isAuthenticated, isAuthorized, unlike);
+postsRouter.delete("/:postId/like", isAuthenticated, unlike);
 
 postsRouter.delete("/:postId", isAuthenticated, isAuthorized, deletePost);
 

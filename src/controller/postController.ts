@@ -79,7 +79,6 @@ export async function like(
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
-
   try {
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -168,6 +167,7 @@ export async function getAllPostsByUsername(
 ) {
   const userId = req.user.id
   const username = req.params.username
+  console.log("Hit get all posts by username username: " + username)
   try {
     const posts = await prisma.post.findMany({
       where: {
@@ -178,6 +178,8 @@ export async function getAllPostsByUsername(
       select: postObjectStructure(userId),
       orderBy: { createdAt: "desc" },
     });
+    console.log("Hit successfully, Posts:")
+    console.log(posts)
     return res.status(200).json(posts);
   } catch (err) {
     return next(err);
