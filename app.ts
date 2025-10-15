@@ -15,7 +15,7 @@ import * as connectRedis from "connect-redis";
 import filesRouter from "./src/routes/files";
 import gifsRouter from "./src/routes/gifs";
 
-const PORT = process.env.NODE_PORT;
+const PORT = process.env.PORT;
 const app = express();
 
 //basic middleware 
