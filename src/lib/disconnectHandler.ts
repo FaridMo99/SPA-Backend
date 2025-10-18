@@ -1,6 +1,6 @@
-import redis from "../cache/redis";
-import { server } from "../../app";
-import prisma from "../db/client";
+import redis from "../cache/redis.js";
+import { server } from "../app.js";
+import prisma from "../db/client.js";
 
 export async function disconnectAllServices(reason: string, error?: Error) {
   console.log(reason, error?.message ?? "");

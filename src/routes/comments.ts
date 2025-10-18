@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from "express";
-import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
 import {
   createComment,
   deleteComment,
@@ -7,14 +7,23 @@ import {
   getAllCommentsByPostId,
   getSingleCommentByPostIdAndCommentId,
   likeComment,
-} from "../controller/commentController";
+} from "../controller/commentController.js";
 
 const commentsRouter = Router();
 
+commentsRouter.post(
+  "/:postId/:commentId/like",
+  isAuthenticated,
+  isAuthorized,
+  likeComment,
+);
 
-commentsRouter.post("/:postId/:commentId/like", isAuthenticated, isAuthorized, likeComment);
-
-commentsRouter.delete("/:postId/:commentId/like", isAuthenticated, isAuthorized, dislikeComment);
+commentsRouter.delete(
+  "/:postId/:commentId/like",
+  isAuthenticated,
+  isAuthorized,
+  dislikeComment,
+);
 
 //get single comment
 commentsRouter.get(
@@ -36,7 +45,6 @@ commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
 
 //create comment
 commentsRouter.post("/:postId", isAuthenticated, createComment);
-
 
 export default commentsRouter;
 

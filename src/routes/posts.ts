@@ -1,22 +1,21 @@
 import { Router } from "express";
-import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
 import {
   createPost,
   deletePost,
-  getAllPostsByFollow,
+  getPostsByFollow,
   getAllPostsByUsername,
   getPostByPostId,
   getRandomPosts,
   like,
   unlike,
-} from "../controller/postController";
+} from "../controller/postController.js";
 
 const postsRouter = Router();
 
-
 postsRouter.post("/", isAuthenticated, createPost);
 
-postsRouter.get("/follow", isAuthenticated, getAllPostsByFollow);
+postsRouter.get("/follow", isAuthenticated, getPostsByFollow);
 
 postsRouter.get("/fyp", isAuthenticated, getRandomPosts);
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
 import {
   deleteUser,
   follow,
@@ -11,11 +11,11 @@ import {
   searchUsers,
   unfollow,
   updateUser,
-} from "../controller/userController";
+} from "../controller/userController.js";
 
 const usersRouter = Router();
 
-usersRouter.get("/user",isAuthenticated, isAuthorized, getFullUser)
+usersRouter.get("/user", isAuthenticated, isAuthorized, getFullUser);
 
 usersRouter.get("/:username/following", isAuthenticated, getFollowing);
 

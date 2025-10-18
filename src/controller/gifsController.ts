@@ -1,4 +1,4 @@
-import { Gif } from "../types/types";
+import { Gif } from "../types/types.js";
 import { Request, Response, NextFunction } from "express";
 
 export async function getTrendingGifs(

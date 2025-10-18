@@ -1,6 +1,6 @@
 import { Request } from "express";
 import session from "express-session";
-import { User } from "../generated/prisma";
+import { User } from "../generated/prisma/index.js";
 
 export interface AuthenticatedRequest<T> extends Request {
   // Passport

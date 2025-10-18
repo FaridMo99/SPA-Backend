@@ -1,14 +1,16 @@
 import chalk from "chalk";
-import { AuthenticatedUserRequest } from "../controller/postController";
-import prisma from "../db/client";
-import { signupSchema, loginSchema } from "../schemas/schemas";
+import { AuthenticatedUserRequest } from "../controller/postController.js";
+import prisma from "../db/client.js";
+import { signupSchema, loginSchema } from "../schemas/schemas.js";
 import { NextFunction, Response, Request } from "express";
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
-  console.log(chalk.yellow(`Validating Login with Schema: ${Object.values(req.body)}`))
+  console.log(
+    chalk.yellow(`Validating Login with Schema: ${Object.values(req.body)}`)
+  );
   const validation = loginSchema.safeParse(req.body);
   if (validation.success) {
-    console.log(chalk.green("Login Validation was successful"))
+    console.log(chalk.green("Login Validation was successful"));
     return next();
   }
   console.log(chalk.red("Login Validation failed"));
@@ -18,9 +20,11 @@ export function validateLogin(req: Request, res: Response, next: NextFunction) {
 export function validateSignup(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
-  console.log(chalk.yellow(`Validating Signup with Schema: ${Object.values(req.body)}`));
+  console.log(
+    chalk.yellow(`Validating Signup with Schema: ${Object.values(req.body)}`)
+  );
   const validation = signupSchema.safeParse(req.body);
   if (validation.success) {
     console.log(chalk.green("Signup Validation was successful"));
@@ -33,70 +37,64 @@ export function validateSignup(
 export function isAuthenticated(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   console.log(chalk.yellow("checking if user logged in"));
-  console.log(req.user)
+  console.log(req.user);
   if (!req.user || req.isUnauthenticated()) {
-    console.log(chalk.red("User not logged in"))
+    console.log(chalk.red("User not logged in"));
     return res.status(401).json({ message: "User not logged in" });
   }
-  console.log(chalk.yellow("user is logged in"));
+
+  if (!req.user.verified)
+    return res.status(400).json({ message: "User is not verified yet" });
   next();
 }
 
 export async function isAuthorized(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user.id;
   const { commentId, postId, username } = req.params;
 
-  console.log(chalk.yellow("checking if user authorized"))
+  console.log(chalk.yellow("Checking if user is authorized..."));
 
   try {
-    if (commentId) {
+    if (commentId && postId) {
+      //comment actions
       const comment = await prisma.comment.findFirst({
-        where: {
-          id: commentId,
-          userId,
-        },
+        where: { id: commentId, userId },
       });
       if (!comment) {
-        console.log(chalk.red("User not authorized to comment"));
+        console.log(chalk.red("User not authorized to modify comment"));
         return res.status(403).json({ message: "Forbidden" });
       }
-    }
-
-    if (postId) {
+    } else if (postId) {
+      // post actions
       const post = await prisma.post.findFirst({
-        where: {
-          id: postId,
-          userId,
-        },
+        where: { id: postId, userId },
       });
       if (!post) {
-        console.log(chalk.red("User not authorized to post"));
+        console.log(chalk.red("User not authorized to modify post"));
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    } else if (username) {
+      //user actions
+      const user = await prisma.user.findFirst({
+        where: { username, id: userId },
+      });
+      if (!user) {
+        console.log(chalk.red("User not authorized to modify user"));
         return res.status(403).json({ message: "Forbidden" });
       }
     }
 
-    if (username) {
-      const user = await prisma.user.findFirst({
-        where: {
-          username,
-          id: userId,
-        },
-      });
-      if (!user) {
-        console.log(chalk.red("User not authorized"));
-        return res.status(403).json({ message: "Forbidden" });
-      }
-    }
-    console.log(chalk.green("user is authorized"));
+    console.log(chalk.green("User is authorized"));
     return next();
   } catch (err) {
+    console.error(chalk.red("Authorization error:"), err);
     return next(err);
   }
 }

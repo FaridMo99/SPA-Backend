@@ -15,27 +15,36 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  createdAt      DateTime  @default(now())
-  username       String
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  username       String   @unique
   birthdate      DateTime
-  email          String
+  email          String   @unique
   password       String
+  verified       Boolean  @default(false)
   profilePicture String?
   bio            String?
-  posts          Post[]
-  comments       Comment[]
-  likedPosts     Post[]    @relation("PostLikes")
-  likedComments  Comment[] @relation("CommentLikes")
-  followers      Follow[]  @relation("UserFollowers")
-  following      Follow[]  @relation("UserFollowing")
+
+  posts         Post[]
+  comments      Comment[]
+  likedPosts    Post[]    @relation("PostLikes")
+  likedComments Comment[] @relation("CommentLikes")
+
+  followers Follow[] @relation("UserFollowers")
+  following Follow[] @relation("UserFollowing")
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  chatsAsUserOne Chat[] @relation("ChatUserOne")
+  chatsAsUserTwo Chat[] @relation("ChatUserTwo")
 }
 
 model Follow {
   followerId  String
   followingId String
-  follower    User   @relation("UserFollowing", fields: [followerId], references: [id], map: "fk_follow_follower", onDelete: Cascade)
-  following   User   @relation("UserFollowers", fields: [followingId], references: [id], map: "fk_follow_following", onDelete: Cascade)
+  follower    User   @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User   @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
 }
@@ -59,4 +68,32 @@ model Comment {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   likedBy   User[]   @relation("CommentLikes")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  content   String
+
+  senderId   String
+  receiverId String
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  chatId String?
+  chat   Chat?   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userOneId String
+  userTwoId String
+
+  userOne User @relation("ChatUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
+  userTwo User @relation("ChatUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
+
+  messages Message[]
 }

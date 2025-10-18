@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware";
-import { getTrendingGifs, searchGifs } from "../controller/gifsController";
+import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
+import { getTrendingGifs, searchGifs } from "../controller/gifsController.js";
 
 const gifsRouter = Router();
 

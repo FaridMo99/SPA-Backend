@@ -1,6 +1,6 @@
 import { Strategy as LocalStrategy, VerifyFunction } from "passport-local";
 import passport from "passport";
-import prisma from "../db/client";
+import prisma from "../db/client.js";
 import bcrypt from "bcrypt";
 import chalk from "chalk";
 
@@ -17,7 +17,7 @@ const verify: VerifyFunction = async (email, password, done) => {
         },
       },
     });
-    
+
     if (!user) {
       console.log("no user " + user);
       return done(null, false, { message: "Email or Password is wrong" });
@@ -38,15 +38,15 @@ const verify: VerifyFunction = async (email, password, done) => {
 };
 
 //store user id in session
-passport.serializeUser((user:any, done) => {
-  console.log("hit serialize user")
+passport.serializeUser((user: any, done) => {
+  console.log("hit serialize user");
   console.log(chalk.bgRed(user));
   done(null, user.id);
 });
 
 //attach user to req.body
 passport.deserializeUser(async (id: string, done) => {
-    console.log("hit deserialize user");
+  console.log("hit deserialize user");
 
   try {
     const user = await prisma.user.findUnique({

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../db/client";
-import { User } from "../generated/prisma";
+import prisma from "../db/client.js";
+import { User } from "../generated/prisma/index.js";
 
 export interface AuthenticatedUserRequest<T> extends Request {
   user: User;
@@ -21,7 +21,7 @@ function postObjectStructure(userId: string) {
     _count: {
       select: {
         likedBy: true,
-        comments:true
+        comments: true,
       },
     },
     likedBy: {
@@ -149,7 +149,7 @@ export async function getPostByPostId(
     const userId = req.user.id;
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: postObjectStructure(userId)
+      select: postObjectStructure(userId),
     });
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -165,39 +165,52 @@ export async function getAllPostsByUsername(
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id
-  const username = req.params.username
-  console.log("Hit get all posts by username username: " + username)
+  const userId = req.user.id;
+  const username = req.params.username;
+  console.log("Hit get all posts by username username: " + username);
   try {
     const posts = await prisma.post.findMany({
       where: {
         user: {
-          username
-        }
+          username,
+        },
       },
       select: postObjectStructure(userId),
       orderBy: { createdAt: "desc" },
     });
-    console.log("Hit successfully, Posts:")
-    console.log(posts)
+    console.log("Hit successfully, Posts:");
+    console.log(posts);
     return res.status(200).json(posts);
   } catch (err) {
     return next(err);
   }
 }
 
-export async function getAllPostsByFollow(
+export async function getPostsByFollow(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user.id;
 
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+
   try {
     const posts = await prisma.post.findMany({
+      select: postObjectStructure(userId),
       where: {
-        /////////________-------______/////////
+        user: {
+          followers: {
+            some: {
+              followerId:userId
+            }
+          }
+        }
       },
+      take: limit,
+      skip: limit * (page - 1),
+      orderBy: { createdAt: "desc" },
     });
     return res.status(200).json(posts);
   } catch (err) {
@@ -214,7 +227,6 @@ export async function getRandomPosts(
 
   const limit = parseInt(req.query.limit as string) || 10;
   const page = parseInt(req.query.page as string) || 1;
-
 
   try {
     const posts = await prisma.post.findMany({

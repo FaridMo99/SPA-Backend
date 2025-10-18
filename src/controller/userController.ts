@@ -1,7 +1,7 @@
-import { NextFunction, Response } from "express";
-import prisma from "../db/client";
-import { AuthenticatedUserRequest } from "./postController";
-import { User } from "../generated/prisma";
+import { NextFunction, Response, Request } from "express";
+import prisma from "../db/client.js";
+import { AuthenticatedUserRequest } from "./postController.js";
+import { User } from "../generated/prisma/index.js";
 
 export type UserWithFollowCount = User & {
   _count: {
@@ -12,18 +12,18 @@ export type UserWithFollowCount = User & {
 
 export type safeUser = Omit<
   UserWithFollowCount,
-  "password" | "email" | "birthdate" | "createdAt" | "id"
+  "password" | "email" | "birthdate" | "createdAt" | "id" | "verified"
 >;
 
 export function createSafeUser(user: UserWithFollowCount): safeUser {
-  const { password, id, email, birthdate, createdAt, ...safeUser } = user;
+  const { password, id, email, birthdate, createdAt, verified, ...safeUser } = user;
   return safeUser;
 }
 
 export async function getUserByUsername(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const username = req.params.username;
   try {
@@ -50,7 +50,7 @@ export async function getUserByUsername(
 export async function deleteUser(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const userId = req.user.id;
@@ -74,7 +74,7 @@ export async function deleteUser(
 export async function updateUser(
   req: AuthenticatedUserRequest<Partial<User>>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const userId = req.user.id;
@@ -121,10 +121,9 @@ export async function updateUser(
 export async function follow(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-
-  //id is the one trying to follow the username so id has to be added to usernames followers 
+  //id is the one trying to follow the username so id has to be added to usernames followers
   const followerId = req.user.id;
   const username = req.params.username;
 
@@ -192,7 +191,7 @@ export async function follow(
 export async function unfollow(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const followerId = req.user.id;
   const username = req.params.username;
@@ -259,7 +258,7 @@ export async function unfollow(
 export async function getFollowers(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const username = req.params.username;
 
@@ -290,7 +289,7 @@ export async function getFollowers(
 export async function getFollowing(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const username = req.params.username;
 
@@ -321,13 +320,15 @@ export async function getFollowing(
 export async function searchUsers(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const username = req.params.username;
+  const userId = req.user.id
 
   try {
     const users = await prisma.user.findMany({
       where: {
+        id:{not:userId},
         username: {
           startsWith: username,
           mode: "insensitive",
@@ -357,7 +358,7 @@ export async function searchUsers(
 export async function getFullUser(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.user.id;
   console.log("hit new route");
@@ -377,11 +378,10 @@ export async function getFullUser(
   }
 }
 
-
 export async function isFollowing(
   req: AuthenticatedUserRequest<string>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const username = req.params.username; // user to check
   const userId = req.user.id; // logged-in user

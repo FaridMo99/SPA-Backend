@@ -4,9 +4,10 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
-    "dev": "tsx watch app.ts",
-    "build": "tsc",
-    "prettier": "prettier --write ."
+    "dev": "tsx watch ./src/app.ts",
+    "build": "prisma generate --schema ./src/prisma/schema.prisma && tsc",
+    "prettier": "prettier --write .",
+    "start": "node dist/app.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.9",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "socket.io": "^4.8.1",
@@ -36,6 +38,7 @@
     "@types/express-session": "^1.18.2",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.2.1",
+    "@types/nodemailer": "^7.0.2",
     "@types/passport": "^1.0.17",
     "@types/passport-local": "^1.0.38",
     "@types/socket.io": "^3.0.1",

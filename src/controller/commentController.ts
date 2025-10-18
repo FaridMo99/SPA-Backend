@@ -1,20 +1,20 @@
 import { Response, NextFunction } from "express";
-import prisma from "../db/client";
-import { AuthenticatedUserRequest } from "./postController";
-import { Comment } from "../generated/prisma";
+import prisma from "../db/client.js";
+import { AuthenticatedUserRequest } from "./postController.js";
+import { Comment } from "../generated/prisma/index.js";
 
 //update type later
 
 function commentObjectStructure(
   userId: string,
-  commentIdentifiers: Partial<Comment>
+  commentIdentifiers: Partial<Comment>,
 ) {
   const commentObject = {
     where: {
       ...commentIdentifiers,
     },
     select: {
-      id:true,
+      id: true,
       content: true,
       createdAt: true,
       user: {
@@ -40,7 +40,7 @@ function commentObjectStructure(
 export async function getAllCommentsByPostId(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -59,7 +59,7 @@ export async function getAllCommentsByPostId(
 export async function getSingleCommentByPostIdAndCommentId(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -67,7 +67,7 @@ export async function getSingleCommentByPostIdAndCommentId(
 
   try {
     const comment = await prisma.comment.findFirst(
-      commentObjectStructure(userId, { postId, id: commentId })
+      commentObjectStructure(userId, { postId, id: commentId }),
     );
     if (!comment) {
       return res.status(404).json({ message: "Comment not Found" });
@@ -81,7 +81,7 @@ export async function getSingleCommentByPostIdAndCommentId(
 export async function createComment(
   req: AuthenticatedUserRequest<{ content: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const postId = req.params.postId;
   const userId = req.user.id;
@@ -105,7 +105,7 @@ export async function createComment(
 export async function deleteComment(
   req: AuthenticatedUserRequest<Comment>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user.id;
   const commentId = req.params.commentId;
@@ -121,14 +121,13 @@ export async function deleteComment(
   }
 }
 
-
 export async function likeComment(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user.id;
-  const postId = req.params.postId; 
+  const postId = req.params.postId;
   const commentId = req.params.commentId;
 
   try {
@@ -155,11 +154,10 @@ export async function likeComment(
   }
 }
 
-
 export async function dislikeComment(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user.id;
   const postId = req.params.postId;
