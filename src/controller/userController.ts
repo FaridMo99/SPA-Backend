@@ -16,7 +16,8 @@ export type safeUser = Omit<
 >;
 
 export function createSafeUser(user: UserWithFollowCount): safeUser {
-  const { password, id, email, birthdate, createdAt, verified, ...safeUser } = user;
+  const { password, id, email, birthdate, createdAt, verified, ...safeUser } =
+    user;
   return safeUser;
 }
 
@@ -323,12 +324,12 @@ export async function searchUsers(
   next: NextFunction,
 ) {
   const username = req.params.username;
-  const userId = req.user.id
+  const userId = req.user.id;
 
   try {
     const users = await prisma.user.findMany({
       where: {
-        id:{not:userId},
+        id: { not: userId },
         username: {
           startsWith: username,
           mode: "insensitive",

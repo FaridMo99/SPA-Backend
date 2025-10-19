@@ -189,7 +189,7 @@ export async function getAllPostsByUsername(
 export async function getPostsByFollow(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user.id;
 
@@ -203,10 +203,10 @@ export async function getPostsByFollow(
         user: {
           followers: {
             some: {
-              followerId:userId
-            }
-          }
-        }
+              followerId: userId,
+            },
+          },
+        },
       },
       take: limit,
       skip: limit * (page - 1),

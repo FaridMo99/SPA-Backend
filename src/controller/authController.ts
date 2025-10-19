@@ -27,7 +27,7 @@ interface LogoutRequest extends Request {
 export async function login(
   req: LoginRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log("hit login endpoint", req.body);
   passport.authenticate(
@@ -38,20 +38,21 @@ export async function login(
         console.log(info.message);
         return res.status(401).json({ message: info.message });
       }
-      if(!user.verified) return res.status(400).json({message:"User not verified"})
+      if (!user.verified)
+        return res.status(400).json({ message: "User not verified" });
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
         //fix so it sends correct user type
         return res.status(200).json(createSafeUser(user));
       });
-    }
+    },
   )(req, res, next);
 }
 
 export async function signup(
   req: SignupRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log(chalk.blue(`Hit signup endpoint: ${req.body}`));
   const { username, password, birthdate, email } = req.body;
@@ -85,7 +86,7 @@ export async function signup(
       newUser.email,
       "verify-success",
       token,
-      newUser.id
+      newUser.id,
     );
     return res.status(200).json({ message: "success" });
   } catch (err) {
@@ -96,7 +97,7 @@ export async function signup(
 export function logout(
   req: AuthenticatedRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log(chalk.yellow("User logging out..."));
   if (!req.session) {
@@ -115,7 +116,7 @@ export function logout(
 export async function checkUser(
   req: AuthenticatedRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.user?.id;
 
@@ -147,7 +148,7 @@ export async function checkUser(
 export async function sendEmailToChangePassword(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const emailAddress = req.body.email;
 
@@ -169,7 +170,7 @@ export async function sendEmailToChangePassword(
       emailAddress,
       "change-password",
       token,
-      user.id
+      user.id,
     );
     return res.status(200).json({ message: "success" });
   } catch (err) {
@@ -180,7 +181,7 @@ export async function sendEmailToChangePassword(
 export async function verifyUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { token, userId } = req.body;
   console.log(req.body);
@@ -228,7 +229,7 @@ export async function verifyUser(
 export async function changePassword(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { token, userId, password } = req.body;
   console.log(req.body);
@@ -245,11 +246,11 @@ export async function changePassword(
     if (redisToken !== token)
       return res.status(403).json({ message: "Invalid Link" });
 
-    const hashedPassword = await bcrypt.hash(password,10)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { password:hashedPassword },
+      data: { password: hashedPassword },
       include: {
         _count: {
           select: {
@@ -261,8 +262,8 @@ export async function changePassword(
     });
 
     if (!user) return res.status(404).json({ message: "User not found" });
-    
-    await redis.del(redisTokenKey)
+
+    await redis.del(redisTokenKey);
 
     req.login(user, (err) => {
       console.log(chalk.magenta("creating session for:" + user));

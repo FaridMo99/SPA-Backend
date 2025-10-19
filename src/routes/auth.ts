@@ -16,7 +16,6 @@ import {
 
 const authRouter = Router();
 
-
 authRouter.post("/forgot-password", sendEmailToChangePassword);
 authRouter.patch("/change-password", changePassword);
 authRouter.post("/verify-user", verifyUser);

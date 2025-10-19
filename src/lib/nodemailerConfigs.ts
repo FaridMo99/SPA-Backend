@@ -6,7 +6,7 @@ export async function sendVerificationEmail(
   receiver: string,
   url: UrlType,
   token: string,
-  userId: string
+  userId: string,
 ) {
   const clientOrigin = process.env.CLIENT_ORIGIN;
 

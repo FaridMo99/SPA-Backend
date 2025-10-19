@@ -15,6 +15,7 @@ import * as connectRedis from "connect-redis";
 import filesRouter from "./routes/files.js";
 import gifsRouter from "./routes/gifs.js";
 import { createServer } from "http";
+import chatsRouter from "./routes/chats.js";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -59,6 +60,7 @@ app.use(passport.session());
 
 //route middleware
 app.use("/auth", authRouter);
+app.use("/chats", chatsRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/comments", commentsRouter);
@@ -72,7 +74,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   return res.status(500).json({ error: "Something went wrong" });
 });
 
-export const server = createServer(app)
+export const server = createServer(app);
 
 server.listen(PORT, () => {
   console.log(chalk.green("Server is Running"));

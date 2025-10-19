@@ -6,7 +6,7 @@ import { NextFunction, Response, Request } from "express";
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
   console.log(
-    chalk.yellow(`Validating Login with Schema: ${Object.values(req.body)}`)
+    chalk.yellow(`Validating Login with Schema: ${Object.values(req.body)}`),
   );
   const validation = loginSchema.safeParse(req.body);
   if (validation.success) {
@@ -20,10 +20,10 @@ export function validateLogin(req: Request, res: Response, next: NextFunction) {
 export function validateSignup(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log(
-    chalk.yellow(`Validating Signup with Schema: ${Object.values(req.body)}`)
+    chalk.yellow(`Validating Signup with Schema: ${Object.values(req.body)}`),
   );
   const validation = signupSchema.safeParse(req.body);
   if (validation.success) {
@@ -37,7 +37,7 @@ export function validateSignup(
 export function isAuthenticated(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log(chalk.yellow("checking if user logged in"));
   console.log(req.user);
@@ -54,10 +54,10 @@ export function isAuthenticated(
 export async function isAuthorized(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user.id;
-  const { commentId, postId, username } = req.params;
+  const { commentId, postId, username, chatId, messageId } = req.params;
 
   console.log(chalk.yellow("Checking if user is authorized..."));
 
@@ -88,6 +88,39 @@ export async function isAuthorized(
       if (!user) {
         console.log(chalk.red("User not authorized to modify user"));
         return res.status(403).json({ message: "Forbidden" });
+      } else if (messageId) {
+        //message actions
+        const message = await prisma.message.findFirst({
+          where: { senderId: userId },
+        });
+        if (!message) {
+          console.log(chalk.red("User not authorized to delete message"));
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      } else if (chatId) {
+        //chat actions
+        const chat = await prisma.chat.findUnique({
+          where: {
+            id: chatId,
+            OR: [{ userOneId: userId }, { userTwoId: userId }],
+          },
+        });
+        if (!chat) {
+          console.log(
+            chalk.red("User not authorized to access or modify chat"),
+          );
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      }
+      //general authz without params
+      else {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+        if (!user) {
+          console.log(chalk.red("User not authorized"));
+          return res.status(403).json({ message: "Forbidden" });
+        }
       }
     }
 
