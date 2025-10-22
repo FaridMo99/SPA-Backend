@@ -1,8 +1,9 @@
 import { NextFunction, Response } from "express";
 import { AuthenticatedUserRequest } from "./postController.js";
 import prisma from "../db/client.js";
+import { io } from "../app.js";
 
-//shouldnt get the ones where deleted is true by req.user.id
+//when chat deleted and created again shouldnt have a preview
 export async function getAllUserChats(
   req: AuthenticatedUserRequest<{}>,
   res: Response,
@@ -27,12 +28,26 @@ export async function getAllUserChats(
         id: true,
         userOne: { select: { profilePicture: true, username: true } },
         userTwo: { select: { profilePicture: true, username: true } },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                read: false,
+                senderId: {
+                  not: userId,
+                },
+              },
+            },
+          },
+        },
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1,
           select: {
             content: true,
+            type: true,
             createdAt: true,
+            deleted: true,
             sender: { select: { username: true } },
             read: true,
           },
@@ -40,7 +55,21 @@ export async function getAllUserChats(
       },
     });
 
-    return res.status(200).json(chats);
+    //remove content when deleted is true
+    chats.forEach((chat) => {
+      const firstMessage = chat.messages?.[0];
+      if (firstMessage?.deleted) {
+        firstMessage.content = null;
+      }
+    });
+    //raw sql sorting would also be possible and performance wise better but then i would lose typesafety so i traded a little bit of performance for typesafety here
+    const sortedChats = chats.sort((a, b) => {
+      const aLatest = a.messages[0]?.createdAt.getTime() ?? 0;
+      const bLatest = b.messages[0]?.createdAt.getTime() ?? 0;
+      return bLatest - aLatest;
+    });
+
+    return res.status(200).json(sortedChats);
   } catch (err) {
     next(err);
   }
@@ -60,20 +89,36 @@ export async function createChat(
 
   try {
     // First, find the other user
-    const userTwo = await prisma.user.findUnique({
+    const userTwo = await prisma.user.findFirst({
       where: { username: userTwoUsername },
     });
 
     if (!userTwo) {
+      console.log("3");
       return res.status(404).json({ message: "Second user not found" });
     }
 
     const userTwoId = userTwo.id;
 
     // Check if chat already exists
-    let chat = await prisma.chat.findUnique({
-      where: { userOneId_userTwoId: { userOneId, userTwoId } },
+    let chat = await prisma.chat.findFirst({
+      where: {
+        OR: [
+          { userOneId, userTwoId },
+          { userOneId: userTwoId, userTwoId: userOneId },
+        ],
+      },
     });
+
+    //check if not deleted by user that requested, if not deleted just send alreadyExists=true to just navigate to it on frontend
+    if (
+      chat &&
+      ((chat.userOneId === userOneId && !chat.deletedByUserOne) ||
+        (chat.userTwoId === userOneId && !chat.deletedByUserTwo))
+    ) {
+      console.log("1");
+      return res.status(200).json({ ...chat, alreadyExists: true });
+    }
 
     if (chat) {
       // Reset deleted flag only for the current user
@@ -95,6 +140,12 @@ export async function createChat(
         },
       });
     }
+
+    io.to(userTwoId).socketsJoin(chat.id);
+    io.to(userTwoId).emit("newChat", {
+      chatId: chat.id,
+    });
+
     return res.status(201).json(chat);
   } catch (err) {
     next(err);
@@ -131,7 +182,7 @@ export async function deleteChat(
       data: updateData,
     });
 
-    return res.status(204);
+    return res.status(204).end();
   } catch (err) {
     next(err);
   }
@@ -156,7 +207,8 @@ export async function getSingleChatByChatId(
             deleted: true,
             content: true,
             createdAt: true,
-            read: true,
+            id: true,
+            type: true,
           },
         },
       },
@@ -175,7 +227,7 @@ export async function getSingleChatByChatId(
     const updatedMessages = await prisma.message.updateMany({
       where: {
         chatId: id,
-        receiverId: req.user.id,
+        NOT: { senderId: req.user.id },
         read: false,
       },
       data: {
@@ -184,20 +236,19 @@ export async function getSingleChatByChatId(
     });
 
     //logic for only sending messages after deletedby id and deletedat date
-    if (chat.deletedByUserOne && chat.userOneId === userId) {
+    // Filter messages after the user deleted the chat
+
+    if (chat.userOneId === userId && chat.deletedAtUserOne) {
       chat.messages = chat.messages.filter(
         (message) => message.createdAt > chat.deletedAtUserOne,
       );
-      return res.status(200).json(chat);
     }
 
-    if (chat.deletedByUserTwo && chat.userOneId === userId) {
+    if (chat.userTwoId === userId && chat.deletedAtUserTwo) {
       chat.messages = chat.messages.filter(
         (message) => message.createdAt > chat.deletedAtUserTwo,
       );
-      return res.status(200).json(chat);
     }
-
     return res.status(200).json(chat);
   } catch (err) {
     next(err);
@@ -210,12 +261,9 @@ export async function createMessage(
   next: NextFunction,
 ) {
   const senderId = req.user.id;
-  const receiverUsername = req.body.receiverUsername;
   const message = req.body.message;
   const chatId = req.params.chatId;
 
-  if (!receiverUsername)
-    return res.status(400).json({ message: "Receiver missing" });
   if (!message) return res.status(400).json({ message: "Message missing" });
 
   try {
@@ -223,6 +271,7 @@ export async function createMessage(
       select: {
         createdAt: true,
         content: true,
+        type: true,
         sender: { select: { username: true, profilePicture: true } },
         read: true,
       },
@@ -230,7 +279,6 @@ export async function createMessage(
         content: message,
         chat: { connect: { id: chatId } },
         sender: { connect: { id: senderId } },
-        receiver: { connect: { username: receiverUsername } },
       },
     });
     return res.status(201).json(newMessage);
@@ -245,17 +293,24 @@ export async function deleteMessage(
   next: NextFunction,
 ) {
   const userId = req.user.id;
-  const messageId = req.body.messageId;
+  const messageId = req.params.messageId;
   const chatId = req.params.chatId;
   try {
     const deletedMessage = await prisma.message.update({
-      where: { id: messageId, sender: { id: userId }, chat: { id: chatId } },
+      where: {
+        id: messageId,
+        sender: { id: userId },
+        chat: { id: chatId },
+        deleted: false,
+      },
       data: {
         deleted: true,
+        read: true,
       },
       select: {
         createdAt: true,
         content: true,
+        type: true,
         sender: { select: { username: true, profilePicture: true } },
         read: true,
       },
@@ -263,8 +318,55 @@ export async function deleteMessage(
 
     return res.status(200).json(deletedMessage);
   } catch (err) {
+    //use this more in other mutations
+    if (err.code === "P2025") {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
     next(err);
   }
 }
 
-//since im using req.user.id, check if websockets even send that to my http api routes
+export async function getAllMessages(
+  req: AuthenticatedUserRequest<{ messageId: string; chatId: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user.id;
+  try {
+    const { read } = req.query;
+    console.log(read);
+    if (read) {
+      const messages = await prisma.message.count({
+        where: {
+          read: read === "false" ? false : true,
+          senderId: {
+            not: userId,
+          },
+          chat: {
+            OR: [{ userOneId: userId }, { userTwoId: userId }],
+            AND: [
+              {
+                OR: [
+                  { userOneId: userId, deletedByUserOne: false },
+                  { userTwoId: userId, deletedByUserTwo: false },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      return res.status(200).json(messages);
+    } else {
+      const messages = await prisma.message.findMany({
+        where: {
+          chat: { OR: [{ userOneId: userId }, { userTwoId: userId }] },
+        },
+      });
+      return res.status(200).json(messages);
+    }
+  } catch (err) {
+    next(err);
+  }
+}

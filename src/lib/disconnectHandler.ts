@@ -1,5 +1,5 @@
 import redis from "../cache/redis.js";
-import { server } from "../app.js";
+import { io, server } from "../app.js";
 import prisma from "../db/client.js";
 
 export async function disconnectAllServices(reason: string, error?: Error) {
@@ -20,6 +20,9 @@ export async function disconnectAllServices(reason: string, error?: Error) {
 
     console.log("Disconnecting DB...");
     await prisma.$disconnect();
+
+    console.log("Disconnecting Websockets...");
+    io.disconnectSockets();
 
     console.log("Disconnects successful. Exiting...");
     process.exit(error ? 1 : 0);

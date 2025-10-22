@@ -16,6 +16,15 @@ import filesRouter from "./routes/files.js";
 import gifsRouter from "./routes/gifs.js";
 import { createServer } from "http";
 import chatsRouter from "./routes/chats.js";
+import { Server as SocketServer } from "socket.io";
+import { websocketAuthMiddleware } from "./middleware/webSocketAuthMiddleware.js";
+import { UserSocket } from "./types/types.js";
+import {
+  createMessageWS,
+  deleteMessageWs,
+  getAllUserChatsIdWS,
+} from "./controller/websocket.js";
+import prisma from "./db/client.js";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -32,15 +41,15 @@ app.use(
 );
 
 //session middleware
-// @ts-ignore fill fix later
 const redisStore = new connectRedis.RedisStore({
   client: redis,
 });
-//adds. req.session with properties i set up here
+
+//adds req.session with properties i set up here
 app.use(
   session({
     store: redisStore,
-    secret: process.env.SESSION_SECRET ?? "ijfeawjiijn322489r3uogrebhou",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     name: "session",
@@ -75,9 +84,119 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 export const server = createServer(app);
-
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  //await prisma.chat.deleteMany()
   console.log(chalk.green("Server is Running"));
+});
+
+//websocket server
+//if using https without load balancer you have to give the cert paths to client and to server to upgrade to wss
+export const io = new SocketServer(server, {
+  cors: {
+    origin: [process.env.CLIENT_ORIGIN],
+    credentials: true,
+  },
+  allowRequest: (req, callback) => {
+    const origin = req.headers.origin;
+    const allowedOrigins = [process.env.CLIENT_ORIGIN];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("Bad WebSocket connection attempt from: " + origin);
+      callback("Not allowed", false);
+    }
+  },
+});
+
+//websocket middleware
+io.use(websocketAuthMiddleware);
+
+//websocket connection
+//add logic so it only sends to correct users, right now it sends to everyone
+io.on("connection", async (socket: UserSocket) => {
+  const userId = socket.userId;
+  console.log(chalk.magenta("connected to ws: " + userId));
+
+  //getting all chat ids
+  try {
+    const userChats = await getAllUserChatsIdWS(userId);
+    if (userChats.length > 0) {
+      await Promise.all(
+        userChats.map((chat) => {
+          socket.join(chat.id);
+          console.log(chalk.green(`${userId} joined chat: ${chat.id}`));
+        }),
+      );
+    }
+  } catch (err) {
+    console.error("Failed to fetch user chats:", err);
+    socket.emit("error", { message: "Failed to load chats" });
+  }
+
+  //message creation
+  socket.on(
+    "message",
+    async (
+      arg: { message: string; chatId: string; type?: "GIF" | "TEXT" },
+      notifyUser,
+    ) => {
+      try {
+        const { message, chatId, type } = arg;
+        console.log(chalk.bgRedBright(`sending message from:${userId}`));
+
+        const newMessage = type
+          ? await createMessageWS(userId, chatId, message, type)
+          : await createMessageWS(userId, chatId, message);
+
+        io.to(chatId).emit("message", newMessage);
+
+        if (notifyUser) {
+          notifyUser({ status: "successful" });
+        }
+      } catch (err) {
+        if (notifyUser) {
+          notifyUser({ status: "failed" });
+        }
+        console.error("Failed to send message:", err);
+        socket.emit("error", { message: err.message });
+      }
+    },
+  );
+
+  //message deletion
+  socket.on(
+    "deleteMessage",
+    async (arg: { messageId: string; chatId: string }, notifyUser) => {
+      try {
+        const { messageId, chatId } = arg;
+        const message = await deleteMessageWs(chatId, messageId, userId);
+        io.to(chatId).emit("messageDeleted");
+
+        if (notifyUser) {
+          notifyUser({ status: "successful" });
+        }
+      } catch (err) {
+        if (notifyUser) {
+          notifyUser({ status: "failed" });
+        }
+        console.error("Failed to delete message:", err);
+        socket.emit("error", { message: err.message });
+      }
+    },
+  );
+
+  socket.on("joinChat", (chatId: string) => {
+    socket.join(chatId);
+  });
+
+  socket.on("leaveChat", (chatId) => {
+    socket.leave(chatId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(chalk.magenta("disconnected from ws: " + userId));
+  });
 });
 
 //process crash handler

@@ -43,6 +43,22 @@ export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>;
 export type Chat = $Result.DefaultSelection<Prisma.$ChatPayload>;
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const MessageType: {
+    TEXT: "TEXT";
+    GIF: "GIF";
+  };
+
+  export type MessageType = (typeof MessageType)[keyof typeof MessageType];
+}
+
+export type MessageType = $Enums.MessageType;
+
+export const MessageType: typeof $Enums.MessageType;
+
+/**
  * ##  Prisma Client ʲˢ
  *
  * Type-safe database client for TypeScript & Node.js
@@ -1416,7 +1432,6 @@ export namespace Prisma {
     followers: number;
     following: number;
     sentMessages: number;
-    receivedMessages: number;
     chatsAsUserOne: number;
     chatsAsUserTwo: number;
   };
@@ -1431,7 +1446,6 @@ export namespace Prisma {
     followers?: boolean | UserCountOutputTypeCountFollowersArgs;
     following?: boolean | UserCountOutputTypeCountFollowingArgs;
     sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs;
-    receivedMessages?: boolean | UserCountOutputTypeCountReceivedMessagesArgs;
     chatsAsUserOne?: boolean | UserCountOutputTypeCountChatsAsUserOneArgs;
     chatsAsUserTwo?: boolean | UserCountOutputTypeCountChatsAsUserTwoArgs;
   };
@@ -1507,15 +1521,6 @@ export namespace Prisma {
    * UserCountOutputType without action
    */
   export type UserCountOutputTypeCountSentMessagesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    where?: MessageWhereInput;
-  };
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountReceivedMessagesArgs<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     where?: MessageWhereInput;
@@ -1868,7 +1873,6 @@ export namespace Prisma {
       followers?: boolean | User$followersArgs<ExtArgs>;
       following?: boolean | User$followingArgs<ExtArgs>;
       sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>;
-      receivedMessages?: boolean | User$receivedMessagesArgs<ExtArgs>;
       chatsAsUserOne?: boolean | User$chatsAsUserOneArgs<ExtArgs>;
       chatsAsUserTwo?: boolean | User$chatsAsUserTwoArgs<ExtArgs>;
       _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>;
@@ -1946,7 +1950,6 @@ export namespace Prisma {
     followers?: boolean | User$followersArgs<ExtArgs>;
     following?: boolean | User$followingArgs<ExtArgs>;
     sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>;
-    receivedMessages?: boolean | User$receivedMessagesArgs<ExtArgs>;
     chatsAsUserOne?: boolean | User$chatsAsUserOneArgs<ExtArgs>;
     chatsAsUserTwo?: boolean | User$chatsAsUserTwoArgs<ExtArgs>;
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>;
@@ -1970,7 +1973,6 @@ export namespace Prisma {
       followers: Prisma.$FollowPayload<ExtArgs>[];
       following: Prisma.$FollowPayload<ExtArgs>[];
       sentMessages: Prisma.$MessagePayload<ExtArgs>[];
-      receivedMessages: Prisma.$MessagePayload<ExtArgs>[];
       chatsAsUserOne: Prisma.$ChatPayload<ExtArgs>[];
       chatsAsUserTwo: Prisma.$ChatPayload<ExtArgs>[];
     };
@@ -2598,17 +2600,6 @@ export namespace Prisma {
     >;
     sentMessages<T extends User$sentMessagesArgs<ExtArgs> = {}>(
       args?: Subset<T, User$sentMessagesArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$MessagePayload<ExtArgs>,
-          T,
-          "findMany",
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    receivedMessages<T extends User$receivedMessagesArgs<ExtArgs> = {}>(
-      args?: Subset<T, User$receivedMessagesArgs<ExtArgs>>,
     ): Prisma.PrismaPromise<
       | $Result.GetResult<
           Prisma.$MessagePayload<ExtArgs>,
@@ -3267,34 +3258,6 @@ export namespace Prisma {
    * User.sentMessages
    */
   export type User$sentMessagesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Message
-     */
-    select?: MessageSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Message
-     */
-    omit?: MessageOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: MessageInclude<ExtArgs> | null;
-    where?: MessageWhereInput;
-    orderBy?:
-      | MessageOrderByWithRelationInput
-      | MessageOrderByWithRelationInput[];
-    cursor?: MessageWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[];
-  };
-
-  /**
-   * User.receivedMessages
-   */
-  export type User$receivedMessagesArgs<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     /**
@@ -6039,6 +6002,7 @@ export namespace Prisma {
   export type CommentMinAggregateOutputType = {
     id: string | null;
     content: string | null;
+    type: $Enums.MessageType | null;
     createdAt: Date | null;
     postId: string | null;
     userId: string | null;
@@ -6047,6 +6011,7 @@ export namespace Prisma {
   export type CommentMaxAggregateOutputType = {
     id: string | null;
     content: string | null;
+    type: $Enums.MessageType | null;
     createdAt: Date | null;
     postId: string | null;
     userId: string | null;
@@ -6055,6 +6020,7 @@ export namespace Prisma {
   export type CommentCountAggregateOutputType = {
     id: number;
     content: number;
+    type: number;
     createdAt: number;
     postId: number;
     userId: number;
@@ -6064,6 +6030,7 @@ export namespace Prisma {
   export type CommentMinAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     postId?: true;
     userId?: true;
@@ -6072,6 +6039,7 @@ export namespace Prisma {
   export type CommentMaxAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     postId?: true;
     userId?: true;
@@ -6080,6 +6048,7 @@ export namespace Prisma {
   export type CommentCountAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     postId?: true;
     userId?: true;
@@ -6166,6 +6135,7 @@ export namespace Prisma {
   export type CommentGroupByOutputType = {
     id: string;
     content: string;
+    type: $Enums.MessageType;
     createdAt: Date;
     postId: string;
     userId: string;
@@ -6193,6 +6163,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       postId?: boolean;
       userId?: boolean;
@@ -6210,6 +6181,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       postId?: boolean;
       userId?: boolean;
@@ -6225,6 +6197,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       postId?: boolean;
       userId?: boolean;
@@ -6237,6 +6210,7 @@ export namespace Prisma {
   export type CommentSelectScalar = {
     id?: boolean;
     content?: boolean;
+    type?: boolean;
     createdAt?: boolean;
     postId?: boolean;
     userId?: boolean;
@@ -6245,7 +6219,7 @@ export namespace Prisma {
   export type CommentOmit<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = $Extensions.GetOmit<
-    "id" | "content" | "createdAt" | "postId" | "userId",
+    "id" | "content" | "type" | "createdAt" | "postId" | "userId",
     ExtArgs["result"]["comment"]
   >;
   export type CommentInclude<
@@ -6282,6 +6256,7 @@ export namespace Prisma {
       {
         id: string;
         content: string;
+        type: $Enums.MessageType;
         createdAt: Date;
         postId: string;
         userId: string;
@@ -6912,6 +6887,7 @@ export namespace Prisma {
   interface CommentFieldRefs {
     readonly id: FieldRef<"Comment", "String">;
     readonly content: FieldRef<"Comment", "String">;
+    readonly type: FieldRef<"Comment", "MessageType">;
     readonly createdAt: FieldRef<"Comment", "DateTime">;
     readonly postId: FieldRef<"Comment", "String">;
     readonly userId: FieldRef<"Comment", "String">;
@@ -7403,8 +7379,8 @@ export namespace Prisma {
     id: string | null;
     createdAt: Date | null;
     content: string | null;
+    type: $Enums.MessageType | null;
     senderId: string | null;
-    receiverId: string | null;
     deleted: boolean | null;
     read: boolean | null;
     chatId: string | null;
@@ -7414,8 +7390,8 @@ export namespace Prisma {
     id: string | null;
     createdAt: Date | null;
     content: string | null;
+    type: $Enums.MessageType | null;
     senderId: string | null;
-    receiverId: string | null;
     deleted: boolean | null;
     read: boolean | null;
     chatId: string | null;
@@ -7425,8 +7401,8 @@ export namespace Prisma {
     id: number;
     createdAt: number;
     content: number;
+    type: number;
     senderId: number;
-    receiverId: number;
     deleted: number;
     read: number;
     chatId: number;
@@ -7437,8 +7413,8 @@ export namespace Prisma {
     id?: true;
     createdAt?: true;
     content?: true;
+    type?: true;
     senderId?: true;
-    receiverId?: true;
     deleted?: true;
     read?: true;
     chatId?: true;
@@ -7448,8 +7424,8 @@ export namespace Prisma {
     id?: true;
     createdAt?: true;
     content?: true;
+    type?: true;
     senderId?: true;
-    receiverId?: true;
     deleted?: true;
     read?: true;
     chatId?: true;
@@ -7459,8 +7435,8 @@ export namespace Prisma {
     id?: true;
     createdAt?: true;
     content?: true;
+    type?: true;
     senderId?: true;
-    receiverId?: true;
     deleted?: true;
     read?: true;
     chatId?: true;
@@ -7548,8 +7524,8 @@ export namespace Prisma {
     id: string;
     createdAt: Date;
     content: string;
+    type: $Enums.MessageType;
     senderId: string;
-    receiverId: string;
     deleted: boolean;
     read: boolean;
     chatId: string;
@@ -7578,13 +7554,12 @@ export namespace Prisma {
       id?: boolean;
       createdAt?: boolean;
       content?: boolean;
+      type?: boolean;
       senderId?: boolean;
-      receiverId?: boolean;
       deleted?: boolean;
       read?: boolean;
       chatId?: boolean;
       sender?: boolean | UserDefaultArgs<ExtArgs>;
-      receiver?: boolean | UserDefaultArgs<ExtArgs>;
       chat?: boolean | ChatDefaultArgs<ExtArgs>;
     },
     ExtArgs["result"]["message"]
@@ -7597,13 +7572,12 @@ export namespace Prisma {
       id?: boolean;
       createdAt?: boolean;
       content?: boolean;
+      type?: boolean;
       senderId?: boolean;
-      receiverId?: boolean;
       deleted?: boolean;
       read?: boolean;
       chatId?: boolean;
       sender?: boolean | UserDefaultArgs<ExtArgs>;
-      receiver?: boolean | UserDefaultArgs<ExtArgs>;
       chat?: boolean | ChatDefaultArgs<ExtArgs>;
     },
     ExtArgs["result"]["message"]
@@ -7616,13 +7590,12 @@ export namespace Prisma {
       id?: boolean;
       createdAt?: boolean;
       content?: boolean;
+      type?: boolean;
       senderId?: boolean;
-      receiverId?: boolean;
       deleted?: boolean;
       read?: boolean;
       chatId?: boolean;
       sender?: boolean | UserDefaultArgs<ExtArgs>;
-      receiver?: boolean | UserDefaultArgs<ExtArgs>;
       chat?: boolean | ChatDefaultArgs<ExtArgs>;
     },
     ExtArgs["result"]["message"]
@@ -7632,8 +7605,8 @@ export namespace Prisma {
     id?: boolean;
     createdAt?: boolean;
     content?: boolean;
+    type?: boolean;
     senderId?: boolean;
-    receiverId?: boolean;
     deleted?: boolean;
     read?: boolean;
     chatId?: boolean;
@@ -7645,8 +7618,8 @@ export namespace Prisma {
     | "id"
     | "createdAt"
     | "content"
+    | "type"
     | "senderId"
-    | "receiverId"
     | "deleted"
     | "read"
     | "chatId",
@@ -7656,21 +7629,18 @@ export namespace Prisma {
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     sender?: boolean | UserDefaultArgs<ExtArgs>;
-    receiver?: boolean | UserDefaultArgs<ExtArgs>;
     chat?: boolean | ChatDefaultArgs<ExtArgs>;
   };
   export type MessageIncludeCreateManyAndReturn<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     sender?: boolean | UserDefaultArgs<ExtArgs>;
-    receiver?: boolean | UserDefaultArgs<ExtArgs>;
     chat?: boolean | ChatDefaultArgs<ExtArgs>;
   };
   export type MessageIncludeUpdateManyAndReturn<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     sender?: boolean | UserDefaultArgs<ExtArgs>;
-    receiver?: boolean | UserDefaultArgs<ExtArgs>;
     chat?: boolean | ChatDefaultArgs<ExtArgs>;
   };
 
@@ -7680,7 +7650,6 @@ export namespace Prisma {
     name: "Message";
     objects: {
       sender: Prisma.$UserPayload<ExtArgs>;
-      receiver: Prisma.$UserPayload<ExtArgs>;
       chat: Prisma.$ChatPayload<ExtArgs>;
     };
     scalars: $Extensions.GetPayloadResult<
@@ -7688,8 +7657,8 @@ export namespace Prisma {
         id: string;
         createdAt: Date;
         content: string;
+        type: $Enums.MessageType;
         senderId: string;
-        receiverId: string;
         deleted: boolean;
         read: boolean;
         chatId: string;
@@ -8253,20 +8222,6 @@ export namespace Prisma {
       ExtArgs,
       GlobalOmitOptions
     >;
-    receiver<T extends UserDefaultArgs<ExtArgs> = {}>(
-      args?: Subset<T, UserDefaultArgs<ExtArgs>>,
-    ): Prisma__UserClient<
-      | $Result.GetResult<
-          Prisma.$UserPayload<ExtArgs>,
-          T,
-          "findUniqueOrThrow",
-          GlobalOmitOptions
-        >
-      | Null,
-      Null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
     chat<T extends ChatDefaultArgs<ExtArgs> = {}>(
       args?: Subset<T, ChatDefaultArgs<ExtArgs>>,
     ): Prisma__ChatClient<
@@ -8324,8 +8279,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Message", "String">;
     readonly createdAt: FieldRef<"Message", "DateTime">;
     readonly content: FieldRef<"Message", "String">;
+    readonly type: FieldRef<"Message", "MessageType">;
     readonly senderId: FieldRef<"Message", "String">;
-    readonly receiverId: FieldRef<"Message", "String">;
     readonly deleted: FieldRef<"Message", "Boolean">;
     readonly read: FieldRef<"Message", "Boolean">;
     readonly chatId: FieldRef<"Message", "String">;
@@ -10228,6 +10183,7 @@ export namespace Prisma {
   export const CommentScalarFieldEnum: {
     id: "id";
     content: "content";
+    type: "type";
     createdAt: "createdAt";
     postId: "postId";
     userId: "userId";
@@ -10240,8 +10196,8 @@ export namespace Prisma {
     id: "id";
     createdAt: "createdAt";
     content: "content";
+    type: "type";
     senderId: "senderId";
-    receiverId: "receiverId";
     deleted: "deleted";
     read: "read";
     chatId: "chatId";
@@ -10330,6 +10286,20 @@ export namespace Prisma {
   >;
 
   /**
+   * Reference to a field of type 'MessageType'
+   */
+  export type EnumMessageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    "MessageType"
+  >;
+
+  /**
+   * Reference to a field of type 'MessageType[]'
+   */
+  export type ListEnumMessageTypeFieldRefInput<$PrismaModel> =
+    FieldRefInputType<$PrismaModel, "MessageType[]">;
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<
@@ -10369,7 +10339,6 @@ export namespace Prisma {
     followers?: FollowListRelationFilter;
     following?: FollowListRelationFilter;
     sentMessages?: MessageListRelationFilter;
-    receivedMessages?: MessageListRelationFilter;
     chatsAsUserOne?: ChatListRelationFilter;
     chatsAsUserTwo?: ChatListRelationFilter;
   };
@@ -10391,7 +10360,6 @@ export namespace Prisma {
     followers?: FollowOrderByRelationAggregateInput;
     following?: FollowOrderByRelationAggregateInput;
     sentMessages?: MessageOrderByRelationAggregateInput;
-    receivedMessages?: MessageOrderByRelationAggregateInput;
     chatsAsUserOne?: ChatOrderByRelationAggregateInput;
     chatsAsUserTwo?: ChatOrderByRelationAggregateInput;
   };
@@ -10417,7 +10385,6 @@ export namespace Prisma {
       followers?: FollowListRelationFilter;
       following?: FollowListRelationFilter;
       sentMessages?: MessageListRelationFilter;
-      receivedMessages?: MessageListRelationFilter;
       chatsAsUserOne?: ChatListRelationFilter;
       chatsAsUserTwo?: ChatListRelationFilter;
     },
@@ -10578,6 +10545,7 @@ export namespace Prisma {
     NOT?: CommentWhereInput | CommentWhereInput[];
     id?: StringFilter<"Comment"> | string;
     content?: StringFilter<"Comment"> | string;
+    type?: EnumMessageTypeFilter<"Comment"> | $Enums.MessageType;
     createdAt?: DateTimeFilter<"Comment"> | Date | string;
     postId?: StringFilter<"Comment"> | string;
     userId?: StringFilter<"Comment"> | string;
@@ -10589,6 +10557,7 @@ export namespace Prisma {
   export type CommentOrderByWithRelationInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     postId?: SortOrder;
     userId?: SortOrder;
@@ -10604,6 +10573,7 @@ export namespace Prisma {
       OR?: CommentWhereInput[];
       NOT?: CommentWhereInput | CommentWhereInput[];
       content?: StringFilter<"Comment"> | string;
+      type?: EnumMessageTypeFilter<"Comment"> | $Enums.MessageType;
       createdAt?: DateTimeFilter<"Comment"> | Date | string;
       postId?: StringFilter<"Comment"> | string;
       userId?: StringFilter<"Comment"> | string;
@@ -10617,6 +10587,7 @@ export namespace Prisma {
   export type CommentOrderByWithAggregationInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     postId?: SortOrder;
     userId?: SortOrder;
@@ -10635,6 +10606,7 @@ export namespace Prisma {
       | CommentScalarWhereWithAggregatesInput[];
     id?: StringWithAggregatesFilter<"Comment"> | string;
     content?: StringWithAggregatesFilter<"Comment"> | string;
+    type?: EnumMessageTypeWithAggregatesFilter<"Comment"> | $Enums.MessageType;
     createdAt?: DateTimeWithAggregatesFilter<"Comment"> | Date | string;
     postId?: StringWithAggregatesFilter<"Comment"> | string;
     userId?: StringWithAggregatesFilter<"Comment"> | string;
@@ -10647,13 +10619,12 @@ export namespace Prisma {
     id?: StringFilter<"Message"> | string;
     createdAt?: DateTimeFilter<"Message"> | Date | string;
     content?: StringFilter<"Message"> | string;
+    type?: EnumMessageTypeFilter<"Message"> | $Enums.MessageType;
     senderId?: StringFilter<"Message"> | string;
-    receiverId?: StringFilter<"Message"> | string;
     deleted?: BoolFilter<"Message"> | boolean;
     read?: BoolFilter<"Message"> | boolean;
     chatId?: StringFilter<"Message"> | string;
     sender?: XOR<UserScalarRelationFilter, UserWhereInput>;
-    receiver?: XOR<UserScalarRelationFilter, UserWhereInput>;
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>;
   };
 
@@ -10661,13 +10632,12 @@ export namespace Prisma {
     id?: SortOrder;
     createdAt?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     senderId?: SortOrder;
-    receiverId?: SortOrder;
     deleted?: SortOrder;
     read?: SortOrder;
     chatId?: SortOrder;
     sender?: UserOrderByWithRelationInput;
-    receiver?: UserOrderByWithRelationInput;
     chat?: ChatOrderByWithRelationInput;
   };
 
@@ -10679,13 +10649,12 @@ export namespace Prisma {
       NOT?: MessageWhereInput | MessageWhereInput[];
       createdAt?: DateTimeFilter<"Message"> | Date | string;
       content?: StringFilter<"Message"> | string;
+      type?: EnumMessageTypeFilter<"Message"> | $Enums.MessageType;
       senderId?: StringFilter<"Message"> | string;
-      receiverId?: StringFilter<"Message"> | string;
       deleted?: BoolFilter<"Message"> | boolean;
       read?: BoolFilter<"Message"> | boolean;
       chatId?: StringFilter<"Message"> | string;
       sender?: XOR<UserScalarRelationFilter, UserWhereInput>;
-      receiver?: XOR<UserScalarRelationFilter, UserWhereInput>;
       chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>;
     },
     "id"
@@ -10695,8 +10664,8 @@ export namespace Prisma {
     id?: SortOrder;
     createdAt?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     senderId?: SortOrder;
-    receiverId?: SortOrder;
     deleted?: SortOrder;
     read?: SortOrder;
     chatId?: SortOrder;
@@ -10716,8 +10685,8 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Message"> | string;
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string;
     content?: StringWithAggregatesFilter<"Message"> | string;
+    type?: EnumMessageTypeWithAggregatesFilter<"Message"> | $Enums.MessageType;
     senderId?: StringWithAggregatesFilter<"Message"> | string;
-    receiverId?: StringWithAggregatesFilter<"Message"> | string;
     deleted?: BoolWithAggregatesFilter<"Message"> | boolean;
     read?: BoolWithAggregatesFilter<"Message"> | boolean;
     chatId?: StringWithAggregatesFilter<"Message"> | string;
@@ -10832,7 +10801,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -10854,7 +10822,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -10876,7 +10843,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -10898,7 +10864,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -11030,6 +10995,7 @@ export namespace Prisma {
   export type CommentCreateInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     post: PostCreateNestedOneWithoutCommentsInput;
     user: UserCreateNestedOneWithoutCommentsInput;
@@ -11039,6 +11005,7 @@ export namespace Prisma {
   export type CommentUncheckedCreateInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     postId: string;
     userId: string;
@@ -11048,6 +11015,7 @@ export namespace Prisma {
   export type CommentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     post?: PostUpdateOneRequiredWithoutCommentsNestedInput;
     user?: UserUpdateOneRequiredWithoutCommentsNestedInput;
@@ -11057,6 +11025,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
     userId?: StringFieldUpdateOperationsInput | string;
@@ -11066,6 +11035,7 @@ export namespace Prisma {
   export type CommentCreateManyInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     postId: string;
     userId: string;
@@ -11074,12 +11044,14 @@ export namespace Prisma {
   export type CommentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
   };
 
   export type CommentUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
     userId?: StringFieldUpdateOperationsInput | string;
@@ -11089,10 +11061,10 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     deleted?: boolean;
     read?: boolean;
     sender: UserCreateNestedOneWithoutSentMessagesInput;
-    receiver: UserCreateNestedOneWithoutReceivedMessagesInput;
     chat: ChatCreateNestedOneWithoutMessagesInput;
   };
 
@@ -11100,8 +11072,8 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     senderId: string;
-    receiverId: string;
     deleted?: boolean;
     read?: boolean;
     chatId: string;
@@ -11111,10 +11083,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput;
-    receiver?: UserUpdateOneRequiredWithoutReceivedMessagesNestedInput;
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput;
   };
 
@@ -11122,8 +11094,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     senderId?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     chatId?: StringFieldUpdateOperationsInput | string;
@@ -11133,8 +11105,8 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     senderId: string;
-    receiverId: string;
     deleted?: boolean;
     read?: boolean;
     chatId: string;
@@ -11144,6 +11116,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
   };
@@ -11152,8 +11125,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     senderId?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     chatId?: StringFieldUpdateOperationsInput | string;
@@ -11524,6 +11497,15 @@ export namespace Prisma {
     userId?: SortOrder;
   };
 
+  export type EnumMessageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MessageType | EnumMessageTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.MessageType[] | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.MessageType[]
+      | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    not?: NestedEnumMessageTypeFilter<$PrismaModel> | $Enums.MessageType;
+  };
+
   export type PostScalarRelationFilter = {
     is?: PostWhereInput;
     isNot?: PostWhereInput;
@@ -11532,6 +11514,7 @@ export namespace Prisma {
   export type CommentCountOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     postId?: SortOrder;
     userId?: SortOrder;
@@ -11540,6 +11523,7 @@ export namespace Prisma {
   export type CommentMaxOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     postId?: SortOrder;
     userId?: SortOrder;
@@ -11548,9 +11532,24 @@ export namespace Prisma {
   export type CommentMinOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     postId?: SortOrder;
     userId?: SortOrder;
+  };
+
+  export type EnumMessageTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MessageType | EnumMessageTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.MessageType[] | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.MessageType[]
+      | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumMessageTypeWithAggregatesFilter<$PrismaModel>
+      | $Enums.MessageType;
+    _count?: NestedIntFilter<$PrismaModel>;
+    _min?: NestedEnumMessageTypeFilter<$PrismaModel>;
+    _max?: NestedEnumMessageTypeFilter<$PrismaModel>;
   };
 
   export type ChatScalarRelationFilter = {
@@ -11562,8 +11561,8 @@ export namespace Prisma {
     id?: SortOrder;
     createdAt?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     senderId?: SortOrder;
-    receiverId?: SortOrder;
     deleted?: SortOrder;
     read?: SortOrder;
     chatId?: SortOrder;
@@ -11573,8 +11572,8 @@ export namespace Prisma {
     id?: SortOrder;
     createdAt?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     senderId?: SortOrder;
-    receiverId?: SortOrder;
     deleted?: SortOrder;
     read?: SortOrder;
     chatId?: SortOrder;
@@ -11584,8 +11583,8 @@ export namespace Prisma {
     id?: SortOrder;
     createdAt?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     senderId?: SortOrder;
-    receiverId?: SortOrder;
     deleted?: SortOrder;
     read?: SortOrder;
     chatId?: SortOrder;
@@ -11758,21 +11757,6 @@ export namespace Prisma {
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
   };
 
-  export type MessageCreateNestedManyWithoutReceiverInput = {
-    create?:
-      | XOR<
-          MessageCreateWithoutReceiverInput,
-          MessageUncheckedCreateWithoutReceiverInput
-        >
-      | MessageCreateWithoutReceiverInput[]
-      | MessageUncheckedCreateWithoutReceiverInput[];
-    connectOrCreate?:
-      | MessageCreateOrConnectWithoutReceiverInput
-      | MessageCreateOrConnectWithoutReceiverInput[];
-    createMany?: MessageCreateManyReceiverInputEnvelope;
-    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-  };
-
   export type ChatCreateNestedManyWithoutUserOneInput = {
     create?:
       | XOR<
@@ -11900,21 +11884,6 @@ export namespace Prisma {
       | MessageCreateOrConnectWithoutSenderInput
       | MessageCreateOrConnectWithoutSenderInput[];
     createMany?: MessageCreateManySenderInputEnvelope;
-    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-  };
-
-  export type MessageUncheckedCreateNestedManyWithoutReceiverInput = {
-    create?:
-      | XOR<
-          MessageCreateWithoutReceiverInput,
-          MessageUncheckedCreateWithoutReceiverInput
-        >
-      | MessageCreateWithoutReceiverInput[]
-      | MessageUncheckedCreateWithoutReceiverInput[];
-    connectOrCreate?:
-      | MessageCreateOrConnectWithoutReceiverInput
-      | MessageCreateOrConnectWithoutReceiverInput[];
-    createMany?: MessageCreateManyReceiverInputEnvelope;
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
   };
 
@@ -12152,34 +12121,6 @@ export namespace Prisma {
     updateMany?:
       | MessageUpdateManyWithWhereWithoutSenderInput
       | MessageUpdateManyWithWhereWithoutSenderInput[];
-    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[];
-  };
-
-  export type MessageUpdateManyWithoutReceiverNestedInput = {
-    create?:
-      | XOR<
-          MessageCreateWithoutReceiverInput,
-          MessageUncheckedCreateWithoutReceiverInput
-        >
-      | MessageCreateWithoutReceiverInput[]
-      | MessageUncheckedCreateWithoutReceiverInput[];
-    connectOrCreate?:
-      | MessageCreateOrConnectWithoutReceiverInput
-      | MessageCreateOrConnectWithoutReceiverInput[];
-    upsert?:
-      | MessageUpsertWithWhereUniqueWithoutReceiverInput
-      | MessageUpsertWithWhereUniqueWithoutReceiverInput[];
-    createMany?: MessageCreateManyReceiverInputEnvelope;
-    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    update?:
-      | MessageUpdateWithWhereUniqueWithoutReceiverInput
-      | MessageUpdateWithWhereUniqueWithoutReceiverInput[];
-    updateMany?:
-      | MessageUpdateManyWithWhereWithoutReceiverInput
-      | MessageUpdateManyWithWhereWithoutReceiverInput[];
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[];
   };
 
@@ -12427,34 +12368,6 @@ export namespace Prisma {
     updateMany?:
       | MessageUpdateManyWithWhereWithoutSenderInput
       | MessageUpdateManyWithWhereWithoutSenderInput[];
-    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[];
-  };
-
-  export type MessageUncheckedUpdateManyWithoutReceiverNestedInput = {
-    create?:
-      | XOR<
-          MessageCreateWithoutReceiverInput,
-          MessageUncheckedCreateWithoutReceiverInput
-        >
-      | MessageCreateWithoutReceiverInput[]
-      | MessageUncheckedCreateWithoutReceiverInput[];
-    connectOrCreate?:
-      | MessageCreateOrConnectWithoutReceiverInput
-      | MessageCreateOrConnectWithoutReceiverInput[];
-    upsert?:
-      | MessageUpsertWithWhereUniqueWithoutReceiverInput
-      | MessageUpsertWithWhereUniqueWithoutReceiverInput[];
-    createMany?: MessageCreateManyReceiverInputEnvelope;
-    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[];
-    update?:
-      | MessageUpdateWithWhereUniqueWithoutReceiverInput
-      | MessageUpdateWithWhereUniqueWithoutReceiverInput[];
-    updateMany?:
-      | MessageUpdateManyWithWhereWithoutReceiverInput
-      | MessageUpdateManyWithWhereWithoutReceiverInput[];
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[];
   };
 
@@ -12806,6 +12719,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[];
   };
 
+  export type EnumMessageTypeFieldUpdateOperationsInput = {
+    set?: $Enums.MessageType;
+  };
+
   export type PostUpdateOneRequiredWithoutCommentsNestedInput = {
     create?: XOR<
       PostCreateWithoutCommentsInput,
@@ -12903,15 +12820,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput;
   };
 
-  export type UserCreateNestedOneWithoutReceivedMessagesInput = {
-    create?: XOR<
-      UserCreateWithoutReceivedMessagesInput,
-      UserUncheckedCreateWithoutReceivedMessagesInput
-    >;
-    connectOrCreate?: UserCreateOrConnectWithoutReceivedMessagesInput;
-    connect?: UserWhereUniqueInput;
-  };
-
   export type ChatCreateNestedOneWithoutMessagesInput = {
     create?: XOR<
       ChatCreateWithoutMessagesInput,
@@ -12935,23 +12843,6 @@ export namespace Prisma {
         UserUpdateWithoutSentMessagesInput
       >,
       UserUncheckedUpdateWithoutSentMessagesInput
-    >;
-  };
-
-  export type UserUpdateOneRequiredWithoutReceivedMessagesNestedInput = {
-    create?: XOR<
-      UserCreateWithoutReceivedMessagesInput,
-      UserUncheckedCreateWithoutReceivedMessagesInput
-    >;
-    connectOrCreate?: UserCreateOrConnectWithoutReceivedMessagesInput;
-    upsert?: UserUpsertWithoutReceivedMessagesInput;
-    connect?: UserWhereUniqueInput;
-    update?: XOR<
-      XOR<
-        UserUpdateToOneWithWhereWithoutReceivedMessagesInput,
-        UserUpdateWithoutReceivedMessagesInput
-      >,
-      UserUncheckedUpdateWithoutReceivedMessagesInput
     >;
   };
 
@@ -13239,6 +13130,32 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null;
   };
 
+  export type NestedEnumMessageTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MessageType | EnumMessageTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.MessageType[] | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.MessageType[]
+      | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+    not?: NestedEnumMessageTypeFilter<$PrismaModel> | $Enums.MessageType;
+  };
+
+  export type NestedEnumMessageTypeWithAggregatesFilter<$PrismaModel = never> =
+    {
+      equals?: $Enums.MessageType | EnumMessageTypeFieldRefInput<$PrismaModel>;
+      in?:
+        | $Enums.MessageType[]
+        | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+      notIn?:
+        | $Enums.MessageType[]
+        | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
+      not?:
+        | NestedEnumMessageTypeWithAggregatesFilter<$PrismaModel>
+        | $Enums.MessageType;
+      _count?: NestedIntFilter<$PrismaModel>;
+      _min?: NestedEnumMessageTypeFilter<$PrismaModel>;
+      _max?: NestedEnumMessageTypeFilter<$PrismaModel>;
+    };
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null;
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null;
@@ -13305,6 +13222,7 @@ export namespace Prisma {
   export type CommentCreateWithoutUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     post: PostCreateNestedOneWithoutCommentsInput;
     likedBy?: UserCreateNestedManyWithoutLikedCommentsInput;
@@ -13313,6 +13231,7 @@ export namespace Prisma {
   export type CommentUncheckedCreateWithoutUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     postId: string;
     likedBy?: UserUncheckedCreateNestedManyWithoutLikedCommentsInput;
@@ -13358,6 +13277,7 @@ export namespace Prisma {
   export type CommentCreateWithoutLikedByInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     post: PostCreateNestedOneWithoutCommentsInput;
     user: UserCreateNestedOneWithoutCommentsInput;
@@ -13366,6 +13286,7 @@ export namespace Prisma {
   export type CommentUncheckedCreateWithoutLikedByInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     postId: string;
     userId: string;
@@ -13425,9 +13346,9 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     deleted?: boolean;
     read?: boolean;
-    receiver: UserCreateNestedOneWithoutReceivedMessagesInput;
     chat: ChatCreateNestedOneWithoutMessagesInput;
   };
 
@@ -13435,7 +13356,7 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
-    receiverId: string;
+    type?: $Enums.MessageType;
     deleted?: boolean;
     read?: boolean;
     chatId: string;
@@ -13451,39 +13372,6 @@ export namespace Prisma {
 
   export type MessageCreateManySenderInputEnvelope = {
     data: MessageCreateManySenderInput | MessageCreateManySenderInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type MessageCreateWithoutReceiverInput = {
-    id?: string;
-    createdAt?: Date | string;
-    content: string;
-    deleted?: boolean;
-    read?: boolean;
-    sender: UserCreateNestedOneWithoutSentMessagesInput;
-    chat: ChatCreateNestedOneWithoutMessagesInput;
-  };
-
-  export type MessageUncheckedCreateWithoutReceiverInput = {
-    id?: string;
-    createdAt?: Date | string;
-    content: string;
-    senderId: string;
-    deleted?: boolean;
-    read?: boolean;
-    chatId: string;
-  };
-
-  export type MessageCreateOrConnectWithoutReceiverInput = {
-    where: MessageWhereUniqueInput;
-    create: XOR<
-      MessageCreateWithoutReceiverInput,
-      MessageUncheckedCreateWithoutReceiverInput
-    >;
-  };
-
-  export type MessageCreateManyReceiverInputEnvelope = {
-    data: MessageCreateManyReceiverInput | MessageCreateManyReceiverInput[];
     skipDuplicates?: boolean;
   };
 
@@ -13626,6 +13514,7 @@ export namespace Prisma {
     NOT?: CommentScalarWhereInput | CommentScalarWhereInput[];
     id?: StringFilter<"Comment"> | string;
     content?: StringFilter<"Comment"> | string;
+    type?: EnumMessageTypeFilter<"Comment"> | $Enums.MessageType;
     createdAt?: DateTimeFilter<"Comment"> | Date | string;
     postId?: StringFilter<"Comment"> | string;
     userId?: StringFilter<"Comment"> | string;
@@ -13786,39 +13675,11 @@ export namespace Prisma {
     id?: StringFilter<"Message"> | string;
     createdAt?: DateTimeFilter<"Message"> | Date | string;
     content?: StringFilter<"Message"> | string;
+    type?: EnumMessageTypeFilter<"Message"> | $Enums.MessageType;
     senderId?: StringFilter<"Message"> | string;
-    receiverId?: StringFilter<"Message"> | string;
     deleted?: BoolFilter<"Message"> | boolean;
     read?: BoolFilter<"Message"> | boolean;
     chatId?: StringFilter<"Message"> | string;
-  };
-
-  export type MessageUpsertWithWhereUniqueWithoutReceiverInput = {
-    where: MessageWhereUniqueInput;
-    update: XOR<
-      MessageUpdateWithoutReceiverInput,
-      MessageUncheckedUpdateWithoutReceiverInput
-    >;
-    create: XOR<
-      MessageCreateWithoutReceiverInput,
-      MessageUncheckedCreateWithoutReceiverInput
-    >;
-  };
-
-  export type MessageUpdateWithWhereUniqueWithoutReceiverInput = {
-    where: MessageWhereUniqueInput;
-    data: XOR<
-      MessageUpdateWithoutReceiverInput,
-      MessageUncheckedUpdateWithoutReceiverInput
-    >;
-  };
-
-  export type MessageUpdateManyWithWhereWithoutReceiverInput = {
-    where: MessageScalarWhereInput;
-    data: XOR<
-      MessageUpdateManyMutationInput,
-      MessageUncheckedUpdateManyWithoutReceiverInput
-    >;
   };
 
   export type ChatUpsertWithWhereUniqueWithoutUserOneInput = {
@@ -13907,7 +13768,6 @@ export namespace Prisma {
     likedComments?: CommentCreateNestedManyWithoutLikedByInput;
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -13928,7 +13788,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedCreateNestedManyWithoutLikedByInput;
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -13957,7 +13816,6 @@ export namespace Prisma {
     likedComments?: CommentCreateNestedManyWithoutLikedByInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -13978,7 +13836,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedCreateNestedManyWithoutLikedByInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14027,7 +13884,6 @@ export namespace Prisma {
     likedComments?: CommentUpdateManyWithoutLikedByNestedInput;
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14048,7 +13904,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedUpdateManyWithoutLikedByNestedInput;
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14089,7 +13944,6 @@ export namespace Prisma {
     likedComments?: CommentUpdateManyWithoutLikedByNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14110,7 +13964,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedUpdateManyWithoutLikedByNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14131,7 +13984,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -14152,7 +14004,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14168,6 +14019,7 @@ export namespace Prisma {
   export type CommentCreateWithoutPostInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     user: UserCreateNestedOneWithoutCommentsInput;
     likedBy?: UserCreateNestedManyWithoutLikedCommentsInput;
@@ -14176,6 +14028,7 @@ export namespace Prisma {
   export type CommentUncheckedCreateWithoutPostInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     userId: string;
     likedBy?: UserUncheckedCreateNestedManyWithoutLikedCommentsInput;
@@ -14210,7 +14063,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -14231,7 +14083,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14280,7 +14131,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14301,7 +14151,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14417,7 +14266,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -14438,7 +14286,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14467,7 +14314,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -14488,7 +14334,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14573,7 +14418,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14594,7 +14438,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14643,7 +14486,6 @@ export namespace Prisma {
     likedComments?: CommentCreateNestedManyWithoutLikedByInput;
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
@@ -14664,7 +14506,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedCreateNestedManyWithoutLikedByInput;
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
@@ -14674,56 +14515,6 @@ export namespace Prisma {
     create: XOR<
       UserCreateWithoutSentMessagesInput,
       UserUncheckedCreateWithoutSentMessagesInput
-    >;
-  };
-
-  export type UserCreateWithoutReceivedMessagesInput = {
-    id?: string;
-    createdAt?: Date | string;
-    username: string;
-    birthdate: Date | string;
-    email: string;
-    password: string;
-    verified?: boolean;
-    profilePicture?: string | null;
-    bio?: string | null;
-    posts?: PostCreateNestedManyWithoutUserInput;
-    comments?: CommentCreateNestedManyWithoutUserInput;
-    likedPosts?: PostCreateNestedManyWithoutLikedByInput;
-    likedComments?: CommentCreateNestedManyWithoutLikedByInput;
-    followers?: FollowCreateNestedManyWithoutFollowingInput;
-    following?: FollowCreateNestedManyWithoutFollowerInput;
-    sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
-    chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
-  };
-
-  export type UserUncheckedCreateWithoutReceivedMessagesInput = {
-    id?: string;
-    createdAt?: Date | string;
-    username: string;
-    birthdate: Date | string;
-    email: string;
-    password: string;
-    verified?: boolean;
-    profilePicture?: string | null;
-    bio?: string | null;
-    posts?: PostUncheckedCreateNestedManyWithoutUserInput;
-    comments?: CommentUncheckedCreateNestedManyWithoutUserInput;
-    likedPosts?: PostUncheckedCreateNestedManyWithoutLikedByInput;
-    likedComments?: CommentUncheckedCreateNestedManyWithoutLikedByInput;
-    followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
-    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
-    chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
-  };
-
-  export type UserCreateOrConnectWithoutReceivedMessagesInput = {
-    where: UserWhereUniqueInput;
-    create: XOR<
-      UserCreateWithoutReceivedMessagesInput,
-      UserUncheckedCreateWithoutReceivedMessagesInput
     >;
   };
 
@@ -14793,7 +14584,6 @@ export namespace Prisma {
     likedComments?: CommentUpdateManyWithoutLikedByNestedInput;
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14814,69 +14604,6 @@ export namespace Prisma {
     likedComments?: CommentUncheckedUpdateManyWithoutLikedByNestedInput;
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
-    chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
-    chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
-  };
-
-  export type UserUpsertWithoutReceivedMessagesInput = {
-    update: XOR<
-      UserUpdateWithoutReceivedMessagesInput,
-      UserUncheckedUpdateWithoutReceivedMessagesInput
-    >;
-    create: XOR<
-      UserCreateWithoutReceivedMessagesInput,
-      UserUncheckedCreateWithoutReceivedMessagesInput
-    >;
-    where?: UserWhereInput;
-  };
-
-  export type UserUpdateToOneWithWhereWithoutReceivedMessagesInput = {
-    where?: UserWhereInput;
-    data: XOR<
-      UserUpdateWithoutReceivedMessagesInput,
-      UserUncheckedUpdateWithoutReceivedMessagesInput
-    >;
-  };
-
-  export type UserUpdateWithoutReceivedMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    username?: StringFieldUpdateOperationsInput | string;
-    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string;
-    email?: StringFieldUpdateOperationsInput | string;
-    password?: StringFieldUpdateOperationsInput | string;
-    verified?: BoolFieldUpdateOperationsInput | boolean;
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null;
-    bio?: NullableStringFieldUpdateOperationsInput | string | null;
-    posts?: PostUpdateManyWithoutUserNestedInput;
-    comments?: CommentUpdateManyWithoutUserNestedInput;
-    likedPosts?: PostUpdateManyWithoutLikedByNestedInput;
-    likedComments?: CommentUpdateManyWithoutLikedByNestedInput;
-    followers?: FollowUpdateManyWithoutFollowingNestedInput;
-    following?: FollowUpdateManyWithoutFollowerNestedInput;
-    sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
-    chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
-  };
-
-  export type UserUncheckedUpdateWithoutReceivedMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    username?: StringFieldUpdateOperationsInput | string;
-    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string;
-    email?: StringFieldUpdateOperationsInput | string;
-    password?: StringFieldUpdateOperationsInput | string;
-    verified?: BoolFieldUpdateOperationsInput | boolean;
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null;
-    bio?: NullableStringFieldUpdateOperationsInput | string | null;
-    posts?: PostUncheckedUpdateManyWithoutUserNestedInput;
-    comments?: CommentUncheckedUpdateManyWithoutUserNestedInput;
-    likedPosts?: PostUncheckedUpdateManyWithoutLikedByNestedInput;
-    likedComments?: CommentUncheckedUpdateManyWithoutLikedByNestedInput;
-    followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
-    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -14956,7 +14683,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserTwo?: ChatCreateNestedManyWithoutUserTwoInput;
   };
 
@@ -14977,7 +14703,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserTwo?: ChatUncheckedCreateNestedManyWithoutUserTwoInput;
   };
 
@@ -15006,7 +14731,6 @@ export namespace Prisma {
     followers?: FollowCreateNestedManyWithoutFollowingInput;
     following?: FollowCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatCreateNestedManyWithoutUserOneInput;
   };
 
@@ -15027,7 +14751,6 @@ export namespace Prisma {
     followers?: FollowUncheckedCreateNestedManyWithoutFollowingInput;
     following?: FollowUncheckedCreateNestedManyWithoutFollowerInput;
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput;
-    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput;
     chatsAsUserOne?: ChatUncheckedCreateNestedManyWithoutUserOneInput;
   };
 
@@ -15043,18 +14766,18 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     deleted?: boolean;
     read?: boolean;
     sender: UserCreateNestedOneWithoutSentMessagesInput;
-    receiver: UserCreateNestedOneWithoutReceivedMessagesInput;
   };
 
   export type MessageUncheckedCreateWithoutChatInput = {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     senderId: string;
-    receiverId: string;
     deleted?: boolean;
     read?: boolean;
   };
@@ -15109,7 +14832,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
 
@@ -15130,7 +14852,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
 
@@ -15171,7 +14892,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
   };
 
@@ -15192,7 +14912,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
   };
 
@@ -15233,6 +14952,7 @@ export namespace Prisma {
   export type CommentCreateManyUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     postId: string;
   };
@@ -15249,17 +14969,7 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
-    receiverId: string;
-    deleted?: boolean;
-    read?: boolean;
-    chatId: string;
-  };
-
-  export type MessageCreateManyReceiverInput = {
-    id?: string;
-    createdAt?: Date | string;
-    content: string;
-    senderId: string;
+    type?: $Enums.MessageType;
     deleted?: boolean;
     read?: boolean;
     chatId: string;
@@ -15310,6 +15020,7 @@ export namespace Prisma {
   export type CommentUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     post?: PostUpdateOneRequiredWithoutCommentsNestedInput;
     likedBy?: UserUpdateManyWithoutLikedCommentsNestedInput;
@@ -15318,6 +15029,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
     likedBy?: UserUncheckedUpdateManyWithoutLikedCommentsNestedInput;
@@ -15326,6 +15038,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
   };
@@ -15356,6 +15069,7 @@ export namespace Prisma {
   export type CommentUpdateWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     post?: PostUpdateOneRequiredWithoutCommentsNestedInput;
     user?: UserUpdateOneRequiredWithoutCommentsNestedInput;
@@ -15364,6 +15078,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
     userId?: StringFieldUpdateOperationsInput | string;
@@ -15372,6 +15087,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateManyWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     postId?: StringFieldUpdateOperationsInput | string;
     userId?: StringFieldUpdateOperationsInput | string;
@@ -15405,9 +15121,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
-    receiver?: UserUpdateOneRequiredWithoutReceivedMessagesNestedInput;
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput;
   };
 
@@ -15415,7 +15131,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     chatId?: StringFieldUpdateOperationsInput | string;
@@ -15425,37 +15141,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
-    deleted?: BoolFieldUpdateOperationsInput | boolean;
-    read?: BoolFieldUpdateOperationsInput | boolean;
-    chatId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type MessageUpdateWithoutReceiverInput = {
-    id?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    content?: StringFieldUpdateOperationsInput | string;
-    deleted?: BoolFieldUpdateOperationsInput | boolean;
-    read?: BoolFieldUpdateOperationsInput | boolean;
-    sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput;
-    chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput;
-  };
-
-  export type MessageUncheckedUpdateWithoutReceiverInput = {
-    id?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    content?: StringFieldUpdateOperationsInput | string;
-    senderId?: StringFieldUpdateOperationsInput | string;
-    deleted?: BoolFieldUpdateOperationsInput | boolean;
-    read?: BoolFieldUpdateOperationsInput | boolean;
-    chatId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type MessageUncheckedUpdateManyWithoutReceiverInput = {
-    id?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    content?: StringFieldUpdateOperationsInput | string;
-    senderId?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     chatId?: StringFieldUpdateOperationsInput | string;
@@ -15576,6 +15262,7 @@ export namespace Prisma {
   export type CommentCreateManyPostInput = {
     id?: string;
     content: string;
+    type?: $Enums.MessageType;
     createdAt?: Date | string;
     userId: string;
   };
@@ -15583,6 +15270,7 @@ export namespace Prisma {
   export type CommentUpdateWithoutPostInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     user?: UserUpdateOneRequiredWithoutCommentsNestedInput;
     likedBy?: UserUpdateManyWithoutLikedCommentsNestedInput;
@@ -15591,6 +15279,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateWithoutPostInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
     likedBy?: UserUncheckedUpdateManyWithoutLikedCommentsNestedInput;
@@ -15599,6 +15288,7 @@ export namespace Prisma {
   export type CommentUncheckedUpdateManyWithoutPostInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
   };
@@ -15619,7 +15309,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -15640,7 +15329,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -15673,7 +15361,6 @@ export namespace Prisma {
     followers?: FollowUpdateManyWithoutFollowingNestedInput;
     following?: FollowUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUpdateManyWithoutUserTwoNestedInput;
   };
@@ -15694,7 +15381,6 @@ export namespace Prisma {
     followers?: FollowUncheckedUpdateManyWithoutFollowingNestedInput;
     following?: FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput;
-    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput;
     chatsAsUserOne?: ChatUncheckedUpdateManyWithoutUserOneNestedInput;
     chatsAsUserTwo?: ChatUncheckedUpdateManyWithoutUserTwoNestedInput;
   };
@@ -15715,8 +15401,8 @@ export namespace Prisma {
     id?: string;
     createdAt?: Date | string;
     content: string;
+    type?: $Enums.MessageType;
     senderId: string;
-    receiverId: string;
     deleted?: boolean;
     read?: boolean;
   };
@@ -15725,18 +15411,18 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
     sender?: UserUpdateOneRequiredWithoutSentMessagesNestedInput;
-    receiver?: UserUpdateOneRequiredWithoutReceivedMessagesNestedInput;
   };
 
   export type MessageUncheckedUpdateWithoutChatInput = {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     senderId?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
   };
@@ -15745,8 +15431,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType;
     senderId?: StringFieldUpdateOperationsInput | string;
-    receiverId?: StringFieldUpdateOperationsInput | string;
     deleted?: BoolFieldUpdateOperationsInput | boolean;
     read?: BoolFieldUpdateOperationsInput | boolean;
   };

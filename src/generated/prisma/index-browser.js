@@ -143,6 +143,7 @@ exports.Prisma.PostScalarFieldEnum = {
 exports.Prisma.CommentScalarFieldEnum = {
   id: "id",
   content: "content",
+  type: "type",
   createdAt: "createdAt",
   postId: "postId",
   userId: "userId",
@@ -152,8 +153,8 @@ exports.Prisma.MessageScalarFieldEnum = {
   id: "id",
   createdAt: "createdAt",
   content: "content",
+  type: "type",
   senderId: "senderId",
-  receiverId: "receiverId",
   deleted: "deleted",
   read: "read",
   chatId: "chatId",
@@ -183,6 +184,10 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: "first",
   last: "last",
+};
+exports.MessageType = exports.$Enums.MessageType = {
+  TEXT: "TEXT",
+  GIF: "GIF",
 };
 
 exports.Prisma.ModelName = {

@@ -14,6 +14,7 @@ function commentObjectStructure(
       ...commentIdentifiers,
     },
     select: {
+      type: true,
       id: true,
       content: true,
       createdAt: true,
@@ -79,13 +80,16 @@ export async function getSingleCommentByPostIdAndCommentId(
 }
 
 export async function createComment(
-  req: AuthenticatedUserRequest<{ content: string }>,
+  req: AuthenticatedUserRequest<{
+    content: string;
+    contentType?: "GIF" | "TEXT";
+  }>,
   res: Response,
   next: NextFunction,
 ) {
-  const postId = req.params.postId;
+  const { postId } = req.params;
   const userId = req.user.id;
-  const content = req.body.content;
+  const { content, contentType } = req.body;
 
   try {
     const comment = await prisma.comment.create({
@@ -93,9 +97,11 @@ export async function createComment(
         postId,
         userId,
         content,
+        type: contentType ?? "TEXT",
       },
       select: commentObjectStructure(userId, { postId }).select,
     });
+
     return res.status(201).json(comment);
   } catch (err) {
     next(err);

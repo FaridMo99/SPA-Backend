@@ -5,6 +5,7 @@ import {
   createMessage,
   deleteChat,
   deleteMessage,
+  getAllMessages,
   getAllUserChats,
   getSingleChatByChatId,
 } from "../controller/chatsController.js";
@@ -13,6 +14,9 @@ const chatsRouter = Router();
 
 //get all user chats(except the one with the deleted flag)
 chatsRouter.get("/", isAuthenticated, getAllUserChats);
+
+//get all messages (mainly for count)
+chatsRouter.get("/messages", isAuthenticated, getAllMessages);
 
 //create chat(when a user creates a chat again he already deleted before, shouldnt render the previous messages(basically on get all chats dont send messages by deleted at before deleted at))
 chatsRouter.post("/", isAuthenticated, isAuthorized, createChat);

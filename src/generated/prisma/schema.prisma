@@ -33,8 +33,7 @@ model User {
   followers Follow[] @relation("UserFollowers")
   following Follow[] @relation("UserFollowing")
 
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages Message[] @relation("SentMessages")
 
   chatsAsUserOne Chat[] @relation("ChatUserOne")
   chatsAsUserTwo Chat[] @relation("ChatUserTwo")
@@ -60,29 +59,27 @@ model Post {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   content   String
-  createdAt DateTime @default(now())
+  type      MessageType @default(TEXT)
+  createdAt DateTime    @default(now())
   postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  likedBy   User[]   @relation("CommentLikes")
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likedBy   User[]      @relation("CommentLikes")
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
   content   String
-
-  senderId   String
-  receiverId String
+  type      MessageType @default(TEXT)
+  senderId  String
+  sender    User        @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   deleted Boolean @default(false)
   read    Boolean @default(false)
-
-  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   chatId String
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
@@ -107,4 +104,9 @@ model Chat {
   messages Message[]
 
   @@unique([userOneId, userTwoId])
+}
+
+enum MessageType {
+  TEXT
+  GIF
 }
