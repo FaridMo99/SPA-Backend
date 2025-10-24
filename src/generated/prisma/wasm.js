@@ -136,6 +136,7 @@ exports.Prisma.FollowScalarFieldEnum = {
 exports.Prisma.PostScalarFieldEnum = {
   id: "id",
   content: "content",
+  type: "type",
   createdAt: "createdAt",
   userId: "userId",
 };
@@ -185,6 +186,11 @@ exports.Prisma.NullsOrder = {
   first: "first",
   last: "last",
 };
+exports.PostType = exports.$Enums.PostType = {
+  TEXT: "TEXT",
+  IMAGE: "IMAGE",
+};
+
 exports.MessageType = exports.$Enums.MessageType = {
   TEXT: "TEXT",
   GIF: "GIF",

@@ -52,11 +52,22 @@ export namespace $Enums {
   };
 
   export type MessageType = (typeof MessageType)[keyof typeof MessageType];
+
+  export const PostType: {
+    TEXT: "TEXT";
+    IMAGE: "IMAGE";
+  };
+
+  export type PostType = (typeof PostType)[keyof typeof PostType];
 }
 
 export type MessageType = $Enums.MessageType;
 
 export const MessageType: typeof $Enums.MessageType;
+
+export type PostType = $Enums.PostType;
+
+export const PostType: typeof $Enums.PostType;
 
 /**
  * ##  Prisma Client ʲˢ
@@ -4641,6 +4652,7 @@ export namespace Prisma {
   export type PostMinAggregateOutputType = {
     id: string | null;
     content: string | null;
+    type: $Enums.PostType | null;
     createdAt: Date | null;
     userId: string | null;
   };
@@ -4648,6 +4660,7 @@ export namespace Prisma {
   export type PostMaxAggregateOutputType = {
     id: string | null;
     content: string | null;
+    type: $Enums.PostType | null;
     createdAt: Date | null;
     userId: string | null;
   };
@@ -4655,6 +4668,7 @@ export namespace Prisma {
   export type PostCountAggregateOutputType = {
     id: number;
     content: number;
+    type: number;
     createdAt: number;
     userId: number;
     _all: number;
@@ -4663,6 +4677,7 @@ export namespace Prisma {
   export type PostMinAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     userId?: true;
   };
@@ -4670,6 +4685,7 @@ export namespace Prisma {
   export type PostMaxAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     userId?: true;
   };
@@ -4677,6 +4693,7 @@ export namespace Prisma {
   export type PostCountAggregateInputType = {
     id?: true;
     content?: true;
+    type?: true;
     createdAt?: true;
     userId?: true;
     _all?: true;
@@ -4760,6 +4777,7 @@ export namespace Prisma {
   export type PostGroupByOutputType = {
     id: string;
     content: string;
+    type: $Enums.PostType;
     createdAt: Date;
     userId: string;
     _count: PostCountAggregateOutputType | null;
@@ -4785,6 +4803,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       userId?: boolean;
       user?: boolean | UserDefaultArgs<ExtArgs>;
@@ -4801,6 +4820,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       userId?: boolean;
       user?: boolean | UserDefaultArgs<ExtArgs>;
@@ -4814,6 +4834,7 @@ export namespace Prisma {
     {
       id?: boolean;
       content?: boolean;
+      type?: boolean;
       createdAt?: boolean;
       userId?: boolean;
       user?: boolean | UserDefaultArgs<ExtArgs>;
@@ -4824,6 +4845,7 @@ export namespace Prisma {
   export type PostSelectScalar = {
     id?: boolean;
     content?: boolean;
+    type?: boolean;
     createdAt?: boolean;
     userId?: boolean;
   };
@@ -4831,7 +4853,7 @@ export namespace Prisma {
   export type PostOmit<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = $Extensions.GetOmit<
-    "id" | "content" | "createdAt" | "userId",
+    "id" | "content" | "type" | "createdAt" | "userId",
     ExtArgs["result"]["post"]
   >;
   export type PostInclude<
@@ -4866,6 +4888,7 @@ export namespace Prisma {
       {
         id: string;
         content: string;
+        type: $Enums.PostType;
         createdAt: Date;
         userId: string;
       },
@@ -5491,6 +5514,7 @@ export namespace Prisma {
   interface PostFieldRefs {
     readonly id: FieldRef<"Post", "String">;
     readonly content: FieldRef<"Post", "String">;
+    readonly type: FieldRef<"Post", "PostType">;
     readonly createdAt: FieldRef<"Post", "DateTime">;
     readonly userId: FieldRef<"Post", "String">;
   }
@@ -10173,6 +10197,7 @@ export namespace Prisma {
   export const PostScalarFieldEnum: {
     id: "id";
     content: "content";
+    type: "type";
     createdAt: "createdAt";
     userId: "userId";
   };
@@ -10283,6 +10308,22 @@ export namespace Prisma {
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<
     $PrismaModel,
     "Boolean"
+  >;
+
+  /**
+   * Reference to a field of type 'PostType'
+   */
+  export type EnumPostTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    "PostType"
+  >;
+
+  /**
+   * Reference to a field of type 'PostType[]'
+   */
+  export type ListEnumPostTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    "PostType[]"
   >;
 
   /**
@@ -10482,6 +10523,7 @@ export namespace Prisma {
     NOT?: PostWhereInput | PostWhereInput[];
     id?: StringFilter<"Post"> | string;
     content?: StringFilter<"Post"> | string;
+    type?: EnumPostTypeFilter<"Post"> | $Enums.PostType;
     createdAt?: DateTimeFilter<"Post"> | Date | string;
     userId?: StringFilter<"Post"> | string;
     user?: XOR<UserScalarRelationFilter, UserWhereInput>;
@@ -10492,6 +10534,7 @@ export namespace Prisma {
   export type PostOrderByWithRelationInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     userId?: SortOrder;
     user?: UserOrderByWithRelationInput;
@@ -10506,6 +10549,7 @@ export namespace Prisma {
       OR?: PostWhereInput[];
       NOT?: PostWhereInput | PostWhereInput[];
       content?: StringFilter<"Post"> | string;
+      type?: EnumPostTypeFilter<"Post"> | $Enums.PostType;
       createdAt?: DateTimeFilter<"Post"> | Date | string;
       userId?: StringFilter<"Post"> | string;
       user?: XOR<UserScalarRelationFilter, UserWhereInput>;
@@ -10518,6 +10562,7 @@ export namespace Prisma {
   export type PostOrderByWithAggregationInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     userId?: SortOrder;
     _count?: PostCountOrderByAggregateInput;
@@ -10535,6 +10580,7 @@ export namespace Prisma {
       | PostScalarWhereWithAggregatesInput[];
     id?: StringWithAggregatesFilter<"Post"> | string;
     content?: StringWithAggregatesFilter<"Post"> | string;
+    type?: EnumPostTypeWithAggregatesFilter<"Post"> | $Enums.PostType;
     createdAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string;
     userId?: StringWithAggregatesFilter<"Post"> | string;
   };
@@ -10939,6 +10985,7 @@ export namespace Prisma {
   export type PostCreateInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     user: UserCreateNestedOneWithoutPostsInput;
     comments?: CommentCreateNestedManyWithoutPostInput;
@@ -10948,6 +10995,7 @@ export namespace Prisma {
   export type PostUncheckedCreateInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     userId: string;
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput;
@@ -10957,6 +11005,7 @@ export namespace Prisma {
   export type PostUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     user?: UserUpdateOneRequiredWithoutPostsNestedInput;
     comments?: CommentUpdateManyWithoutPostNestedInput;
@@ -10966,6 +11015,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput;
@@ -10975,6 +11025,7 @@ export namespace Prisma {
   export type PostCreateManyInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     userId: string;
   };
@@ -10982,12 +11033,14 @@ export namespace Prisma {
   export type PostUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
   };
 
   export type PostUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
   };
@@ -11466,6 +11519,13 @@ export namespace Prisma {
     followingId?: SortOrder;
   };
 
+  export type EnumPostTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    not?: NestedEnumPostTypeFilter<$PrismaModel> | $Enums.PostType;
+  };
+
   export type UserListRelationFilter = {
     every?: UserWhereInput;
     some?: UserWhereInput;
@@ -11479,6 +11539,7 @@ export namespace Prisma {
   export type PostCountOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     userId?: SortOrder;
   };
@@ -11486,6 +11547,7 @@ export namespace Prisma {
   export type PostMaxOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     userId?: SortOrder;
   };
@@ -11493,8 +11555,21 @@ export namespace Prisma {
   export type PostMinOrderByAggregateInput = {
     id?: SortOrder;
     content?: SortOrder;
+    type?: SortOrder;
     createdAt?: SortOrder;
     userId?: SortOrder;
+  };
+
+  export type EnumPostTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumPostTypeWithAggregatesFilter<$PrismaModel>
+      | $Enums.PostType;
+    _count?: NestedIntFilter<$PrismaModel>;
+    _min?: NestedEnumPostTypeFilter<$PrismaModel>;
+    _max?: NestedEnumPostTypeFilter<$PrismaModel>;
   };
 
   export type EnumMessageTypeFilter<$PrismaModel = never> = {
@@ -12546,6 +12621,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[];
   };
 
+  export type EnumPostTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PostType;
+  };
+
   export type UserUpdateOneRequiredWithoutPostsNestedInput = {
     create?: XOR<
       UserCreateWithoutPostsInput,
@@ -13130,6 +13209,25 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null;
   };
 
+  export type NestedEnumPostTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    not?: NestedEnumPostTypeFilter<$PrismaModel> | $Enums.PostType;
+  };
+
+  export type NestedEnumPostTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>;
+    in?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    notIn?: $Enums.PostType[] | ListEnumPostTypeFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumPostTypeWithAggregatesFilter<$PrismaModel>
+      | $Enums.PostType;
+    _count?: NestedIntFilter<$PrismaModel>;
+    _min?: NestedEnumPostTypeFilter<$PrismaModel>;
+    _max?: NestedEnumPostTypeFilter<$PrismaModel>;
+  };
+
   export type NestedEnumMessageTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.MessageType | EnumMessageTypeFieldRefInput<$PrismaModel>;
     in?: $Enums.MessageType[] | ListEnumMessageTypeFieldRefInput<$PrismaModel>;
@@ -13193,6 +13291,7 @@ export namespace Prisma {
   export type PostCreateWithoutUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     comments?: CommentCreateNestedManyWithoutPostInput;
     likedBy?: UserCreateNestedManyWithoutLikedPostsInput;
@@ -13201,6 +13300,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput;
     likedBy?: UserUncheckedCreateNestedManyWithoutLikedPostsInput;
@@ -13253,6 +13353,7 @@ export namespace Prisma {
   export type PostCreateWithoutLikedByInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     user: UserCreateNestedOneWithoutPostsInput;
     comments?: CommentCreateNestedManyWithoutPostInput;
@@ -13261,6 +13362,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutLikedByInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     userId: string;
     comments?: CommentUncheckedCreateNestedManyWithoutPostInput;
@@ -13476,6 +13578,7 @@ export namespace Prisma {
     NOT?: PostScalarWhereInput | PostScalarWhereInput[];
     id?: StringFilter<"Post"> | string;
     content?: StringFilter<"Post"> | string;
+    type?: EnumPostTypeFilter<"Post"> | $Enums.PostType;
     createdAt?: DateTimeFilter<"Post"> | Date | string;
     userId?: StringFilter<"Post"> | string;
   };
@@ -14229,6 +14332,7 @@ export namespace Prisma {
   export type PostCreateWithoutCommentsInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     user: UserCreateNestedOneWithoutPostsInput;
     likedBy?: UserCreateNestedManyWithoutLikedPostsInput;
@@ -14237,6 +14341,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutCommentsInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
     userId: string;
     likedBy?: UserUncheckedCreateNestedManyWithoutLikedPostsInput;
@@ -14369,6 +14474,7 @@ export namespace Prisma {
   export type PostUpdateWithoutCommentsInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     user?: UserUpdateOneRequiredWithoutPostsNestedInput;
     likedBy?: UserUpdateManyWithoutLikedPostsNestedInput;
@@ -14377,6 +14483,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutCommentsInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
     likedBy?: UserUncheckedUpdateManyWithoutLikedPostsNestedInput;
@@ -14946,6 +15053,7 @@ export namespace Prisma {
   export type PostCreateManyUserInput = {
     id?: string;
     content: string;
+    type?: $Enums.PostType;
     createdAt?: Date | string;
   };
 
@@ -14998,6 +15106,7 @@ export namespace Prisma {
   export type PostUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     comments?: CommentUpdateManyWithoutPostNestedInput;
     likedBy?: UserUpdateManyWithoutLikedPostsNestedInput;
@@ -15006,6 +15115,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput;
     likedBy?: UserUncheckedUpdateManyWithoutLikedPostsNestedInput;
@@ -15014,6 +15124,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
   };
 
@@ -15046,6 +15157,7 @@ export namespace Prisma {
   export type PostUpdateWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     user?: UserUpdateOneRequiredWithoutPostsNestedInput;
     comments?: CommentUpdateManyWithoutPostNestedInput;
@@ -15054,6 +15166,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
     comments?: CommentUncheckedUpdateManyWithoutPostNestedInput;
@@ -15062,6 +15175,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateManyWithoutLikedByInput = {
     id?: StringFieldUpdateOperationsInput | string;
     content?: StringFieldUpdateOperationsInput | string;
+    type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType;
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
     userId?: StringFieldUpdateOperationsInput | string;
   };

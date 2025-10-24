@@ -51,6 +51,7 @@ model Follow {
 model Post {
   id        String    @id @default(uuid())
   content   String
+  type      PostType  @default(TEXT)
   createdAt DateTime  @default(now())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -109,4 +110,9 @@ model Chat {
 enum MessageType {
   TEXT
   GIF
+}
+
+enum PostType {
+  TEXT
+  IMAGE
 }

@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
+import {
+  isAuthenticated,
+  isAuthorized,
+  validateEdit,
+} from "../middleware/authMiddleware.js";
 import {
   deleteUser,
   follow,
@@ -12,8 +16,13 @@ import {
   unfollow,
   updateUser,
 } from "../controller/userController.js";
+import multer from "multer";
+import { validateFile } from "../middleware/fileMiddleware.js";
 
 const usersRouter = Router();
+
+//could become potential issue over time when theres a lot of traffic
+export const upload = multer({ storage: multer.memoryStorage() });
 
 usersRouter.get("/user", isAuthenticated, isAuthorized, getFullUser);
 
@@ -33,6 +42,14 @@ usersRouter.get("/:username", isAuthenticated, getUserByUsername);
 
 usersRouter.delete("/:username", isAuthenticated, isAuthorized, deleteUser);
 
-usersRouter.patch("/:username", isAuthenticated, isAuthorized, updateUser);
+usersRouter.patch(
+  "/:username",
+  isAuthenticated,
+  isAuthorized,
+  upload.single("profilePicture"),
+  validateFile,
+  validateEdit,
+  updateUser,
+);
 
 export default usersRouter;

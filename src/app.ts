@@ -12,7 +12,6 @@ import session from "express-session";
 import passport from "./lib/passportConfig.js";
 import redis from "./cache/redis.js";
 import * as connectRedis from "connect-redis";
-import filesRouter from "./routes/files.js";
 import gifsRouter from "./routes/gifs.js";
 import { createServer } from "http";
 import chatsRouter from "./routes/chats.js";
@@ -25,6 +24,8 @@ import {
   getAllUserChatsIdWS,
 } from "./controller/websocket.js";
 import prisma from "./db/client.js";
+import { isAuthenticated } from "./middleware/authMiddleware.js";
+import { getSingleFileByFileName } from "./controller/uploadsController.js";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -73,8 +74,8 @@ app.use("/chats", chatsRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/comments", commentsRouter);
-app.use("/files", filesRouter);
 app.use("/gifs", gifsRouter);
+app.get("/uploads/:filename", isAuthenticated, getSingleFileByFileName);
 
 //global error handler middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -85,7 +86,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 export const server = createServer(app);
 server.listen(PORT, async () => {
-  //await prisma.chat.deleteMany()
+  //await prisma.user.deleteMany()
   console.log(chalk.green("Server is Running"));
 });
 

@@ -15,13 +15,13 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  createdAt      DateTime  @default(now())
-  username       String    @unique
+  id             String      @id @default(uuid())
+  createdAt      DateTime    @default(now())
+  username       String      @unique
   birthdate      DateTime
-  email          String    @unique
+  email          String      @unique
   password       String
-  verified       Boolean   @default(false)
+  verified       Boolean     @default(false)
   profilePicture String?
   bio            String?
 
@@ -43,14 +43,15 @@ model User {
 model Follow {
   followerId  String
   followingId String
-  follower    User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
-  following   User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  follower    User    @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User    @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
   @@id([followerId, followingId])
 }
 
 model Post {
   id        String    @id @default(uuid())
   content   String
+  type      PostType  @default(TEXT)
   createdAt DateTime  @default(now())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -59,41 +60,41 @@ model Post {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
-  type       MessageType   @default(TEXT)
-  createdAt DateTime @default(now())
+  type      MessageType   @default(TEXT)
+  createdAt DateTime      @default(now())
   postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  likedBy   User[]   @relation("CommentLikes") 
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likedBy   User[]        @relation("CommentLikes") 
 }
 
 model Message {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
+  id         String        @id @default(uuid())
+  createdAt  DateTime      @default(now())
   content    String
   type       MessageType   @default(TEXT)
   senderId   String
-  sender     User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  sender     User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
-  deleted    Boolean @default(false)
-  read       Boolean @default(false)
+  deleted    Boolean       @default(false)
+  read       Boolean       @default(false)
 
   chatId     String
-  chat       Chat  @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chat       Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
 
 model Chat {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
+  id         String         @id @default(uuid())
+  createdAt  DateTime       @default(now())
 
   userOneId  String
   userTwoId  String
 
-  userOne    User @relation("ChatUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
-  userTwo    User @relation("ChatUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
+  userOne    User            @relation("ChatUserOne", fields: [userOneId], references: [id], onDelete: Cascade)
+  userTwo    User            @relation("ChatUserTwo", fields: [userTwoId], references: [id], onDelete: Cascade)
 
   deletedByUserOne Boolean   @default(false)
   deletedAtUserOne DateTime?
@@ -109,4 +110,9 @@ model Chat {
 enum MessageType {
   TEXT
   GIF
+}
+
+enum PostType {
+  TEXT
+  IMAGE
 }

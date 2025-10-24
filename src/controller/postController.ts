@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../db/client.js";
 import { User } from "../generated/prisma/index.js";
+import { v4 } from "uuid";
+import path from "path";
+import fs from "fs/promises";
 
 export interface AuthenticatedUserRequest<T> extends Request {
   user: User;
   body: T;
+  file?: Express.Multer.File;
 }
 
 function postObjectStructure(userId: string) {
@@ -12,6 +16,7 @@ function postObjectStructure(userId: string) {
     id: true,
     content: true,
     createdAt: true,
+    type: true,
     user: {
       select: {
         username: true,
@@ -40,13 +45,45 @@ export async function createPost(
 ) {
   const userId = req.user.id;
   const content = req.body.content;
+  const file = req.file;
+
+  let filePath: string;
+
   try {
+    if (file) {
+      //create filename and get upload directory
+      const filename = `${v4()}-${file.originalname.replace(/\s+/g, "_")}`;
+      const uploadDir = path.join(import.meta.dirname, "../uploads");
+
+      //create path and write on disk
+      const fullPath = path.join(uploadDir, filename);
+      await fs.writeFile(fullPath, file.buffer);
+      filePath = `${process.env.BACKEND_URL}/uploads/${filename}`;
+    }
     const post = await prisma.post.create({
-      data: { userId, content },
+      data: {
+        userId,
+        content: file ? filePath : content,
+        type: file ? "IMAGE" : "TEXT",
+      },
       select: postObjectStructure(userId),
     });
     return res.status(201).json(post);
   } catch (err) {
+    //delete image when creation failed
+    if (filePath) {
+      try {
+        const fullPath = path.join(
+          import.meta.dirname,
+          "../uploads",
+          filePath.split("/")[4],
+        );
+        await fs.unlink(fullPath);
+        console.log(`Deleted file: ${fullPath}`);
+      } catch (err) {
+        console.log("Failed to delete file: " + err);
+      }
+    }
     return next(err);
   }
 }
@@ -66,6 +103,18 @@ export async function deletePost(
       },
       select: postObjectStructure(userId),
     });
+
+    //delete image on disk if theres one
+    if (deletedPost.type === "IMAGE") {
+      await fs.unlink(
+        path.join(
+          import.meta.dirname,
+          "../uploads",
+          deletedPost.content.split("/")[4],
+        ),
+      );
+    }
+
     return res.status(200).json(deletedPost);
   } catch (err) {
     return next(err);
@@ -235,6 +284,7 @@ export async function getRandomPosts(
       skip: limit * (page - 1),
       orderBy: { createdAt: "desc" },
     });
+    console.log(posts);
     return res.status(200).json(posts);
   } catch (err) {
     return next(err);

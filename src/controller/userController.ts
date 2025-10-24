@@ -2,6 +2,9 @@ import { NextFunction, Response, Request } from "express";
 import prisma from "../db/client.js";
 import { AuthenticatedUserRequest } from "./postController.js";
 import { User } from "../generated/prisma/index.js";
+import fs from "fs/promises";
+import path from "path";
+import { v4 } from "uuid";
 
 export type UserWithFollowCount = User & {
   _count: {
@@ -66,6 +69,17 @@ export async function deleteUser(
         },
       },
     });
+
+    if (deletedUser.profilePicture) {
+      await fs.unlink(
+        path.join(
+          import.meta.dirname,
+          "../uploads",
+          deletedUser.profilePicture.split("/")[4],
+        ),
+      );
+    }
+
     return res.status(200).json(createSafeUser(deletedUser));
   } catch (err) {
     next(err);
@@ -80,6 +94,9 @@ export async function updateUser(
   try {
     const userId = req.user.id;
     const fieldsToUpdate = req.body;
+    const file = req.file;
+
+    console.log("hit edit user");
 
     if (
       fieldsToUpdate.username &&
@@ -101,6 +118,33 @@ export async function updateUser(
       if (user) return res.status(400).json({ message: "Email already taken" });
     }
 
+    if (file) {
+      //create filename and get upload directory
+      const filename = `${v4()}-${file.originalname.replace(/\s+/g, "_")}`;
+      const uploadDir = path.join(import.meta.dirname, "../uploads");
+
+      //create path and write on disk
+      const fullPath = path.join(uploadDir, filename);
+      await fs.writeFile(fullPath, file.buffer);
+      fieldsToUpdate.profilePicture = `${process.env.BACKEND_URL}/uploads/${filename}`;
+      const pathToDelete = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { profilePicture: true },
+      });
+
+      //delete old profilepic if exists
+      if (pathToDelete.profilePicture) {
+        await fs.unlink(
+          path.join(
+            import.meta.dirname,
+            "../uploads",
+            pathToDelete.profilePicture.split("/")[4],
+          ),
+        );
+      }
+    }
+
+    //update profile pic and delete old from disk
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { ...fieldsToUpdate },

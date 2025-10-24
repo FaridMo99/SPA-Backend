@@ -1,7 +1,11 @@
 import chalk from "chalk";
 import { AuthenticatedUserRequest } from "../controller/postController.js";
 import prisma from "../db/client.js";
-import { signupSchema, loginSchema } from "../schemas/schemas.js";
+import {
+  signupSchema,
+  loginSchema,
+  editUserSchema,
+} from "../schemas/schemas.js";
 import { NextFunction, Response, Request } from "express";
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
@@ -130,4 +134,27 @@ export async function isAuthorized(
     console.error(chalk.red("Authorization error:"), err);
     return next(err);
   }
+}
+
+export function validateEdit(
+  req: AuthenticatedUserRequest<{ username?: string; bio?: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  console.log(
+    chalk.yellow(`Validating Edit with Schema: ${Object.values(req.body)}`),
+  );
+  const { username, bio } = req.body;
+  const file = req.file;
+  const validation = editUserSchema.safeParse({
+    username,
+    bio,
+    profilePicture: file,
+  });
+  if (validation.success) {
+    console.log(chalk.green("Edit Validation was successful"));
+    return next();
+  }
+  console.log(chalk.red("Edit Validation failed"));
+  return res.status(400).json({ message: "Invalid Input" });
 }

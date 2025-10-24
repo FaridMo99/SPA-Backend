@@ -150,8 +150,8 @@ export async function sendEmailToChangePassword(
   res: Response,
   next: NextFunction,
 ) {
+  console.log(req.body);
   const emailAddress = req.body.email;
-
   if (!emailAddress) return res.status(400).json({ message: "E-Mail missing" });
 
   try {
@@ -231,6 +231,7 @@ export async function changePassword(
   res: Response,
   next: NextFunction,
 ) {
+  console.log("hit chnage password");
   const { token, userId, password } = req.body;
   console.log(req.body);
   console.log("hit change password");
