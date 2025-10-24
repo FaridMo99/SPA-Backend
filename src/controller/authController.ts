@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import z from "zod";
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, signupSchema } from "../schemas/schemas.js";
-import { Session } from "express-session";
 import passport from "../lib/passportConfig.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import chalk from "chalk";
@@ -12,20 +11,8 @@ import { sendVerificationEmail } from "../lib/nodemailerConfigs.js";
 import redis from "../cache/redis.js";
 import { v4 } from "uuid";
 
-interface SignupRequest extends Request {
-  body: z.infer<typeof signupSchema>;
-}
-
-interface LoginRequest extends Request {
-  body: z.infer<typeof loginSchema>;
-}
-
-interface LogoutRequest extends Request {
-  session: Session;
-}
-
 export async function login(
-  req: LoginRequest,
+  req: Request<{}, {}, z.infer<typeof loginSchema>>,
   res: Response,
   next: NextFunction,
 ) {
@@ -50,7 +37,7 @@ export async function login(
 }
 
 export async function signup(
-  req: SignupRequest,
+  req: Request<{}, {}, z.infer<typeof signupSchema>>,
   res: Response,
   next: NextFunction,
 ) {

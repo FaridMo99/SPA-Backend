@@ -10,6 +10,7 @@ export interface UserSocket extends Socket {
 export interface AuthenticatedRequest<T> extends Request {
   // Passport
   user?: User;
+  file?: Express.Multer.File;
   login: Request["login"];
   logout: Request["logout"];
   isAuthenticated: Request["isAuthenticated"];
@@ -76,4 +77,12 @@ export type GifForClient = {
   width: number;
   height: number;
   blur_preview?: string;
+};
+
+export type Params = {
+  commentId: string;
+  postId: string;
+  username: string;
+  chatId: string;
+  messageId: string;
 };

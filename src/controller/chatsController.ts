@@ -1,15 +1,16 @@
 import { NextFunction, Response } from "express";
-import { AuthenticatedUserRequest } from "./postController.js";
 import prisma from "../db/client.js";
 import { io } from "../app.js";
+import { Prisma } from "../generated/prisma/edge.js";
+import { AuthenticatedRequest } from "../types/types.js";
 
 //when chat deleted and created again shouldnt have a preview
 export async function getAllUserChats(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   try {
     const chats = await prisma.chat.findMany({
       where: {
@@ -59,7 +60,7 @@ export async function getAllUserChats(
     chats.forEach((chat) => {
       const firstMessage = chat.messages?.[0];
       if (firstMessage?.deleted) {
-        firstMessage.content = null;
+        firstMessage.content = "";
       }
     });
     //raw sql sorting would also be possible and performance wise better but then i would lose typesafety so i traded a little bit of performance for typesafety here
@@ -77,11 +78,11 @@ export async function getAllUserChats(
 
 //check what to return, should return the same as get single chat
 export async function createChat(
-  req: AuthenticatedUserRequest<{ userTwoUsername: string }>,
+  req: AuthenticatedRequest<{ userTwoUsername: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  const userOneId = req.user.id;
+  const userOneId = req.user?.id;
   const userTwoUsername = req.body.userTwoUsername;
 
   if (!userTwoUsername)
@@ -153,11 +154,11 @@ export async function createChat(
 }
 
 export async function deleteChat(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const chatId = req.params.chatId;
 
   try {
@@ -190,12 +191,12 @@ export async function deleteChat(
 
 //check what to return, should return the same as delete and create and get single chat
 export async function getSingleChatByChatId(
-  req: AuthenticatedUserRequest<{ userTwoUsername: string }>,
+  req: AuthenticatedRequest<{ userTwoUsername: string }>,
   res: Response,
   next: NextFunction,
 ) {
   const id = req.params.chatId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
 
   try {
     const chat = await prisma.chat.findFirst({
@@ -219,7 +220,7 @@ export async function getSingleChatByChatId(
     //logic for when deleted messages included dont send content just the boolean
     chat.messages.forEach((message, index) => {
       if (message.deleted) {
-        chat.messages[index].content = null;
+        chat.messages[index].content = "";
       }
     });
 
@@ -227,7 +228,7 @@ export async function getSingleChatByChatId(
     const updatedMessages = await prisma.message.updateMany({
       where: {
         chatId: id,
-        NOT: { senderId: req.user.id },
+        NOT: { senderId: req.user?.id },
         read: false,
       },
       data: {
@@ -240,13 +241,15 @@ export async function getSingleChatByChatId(
 
     if (chat.userOneId === userId && chat.deletedAtUserOne) {
       chat.messages = chat.messages.filter(
-        (message) => message.createdAt > chat.deletedAtUserOne,
+        (message) =>
+          chat.deletedAtUserOne && message.createdAt > chat.deletedAtUserOne,
       );
     }
 
     if (chat.userTwoId === userId && chat.deletedAtUserTwo) {
       chat.messages = chat.messages.filter(
-        (message) => message.createdAt > chat.deletedAtUserTwo,
+        (message) =>
+          chat.deletedAtUserTwo && message.createdAt > chat.deletedAtUserTwo,
       );
     }
     return res.status(200).json(chat);
@@ -256,11 +259,11 @@ export async function getSingleChatByChatId(
 }
 
 export async function createMessage(
-  req: AuthenticatedUserRequest<{ receiverUsername: string; message: string }>,
+  req: AuthenticatedRequest<{ receiverUsername: string; message: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  const senderId = req.user.id;
+  const senderId = req.user?.id;
   const message = req.body.message;
   const chatId = req.params.chatId;
 
@@ -288,11 +291,11 @@ export async function createMessage(
 }
 
 export async function deleteMessage(
-  req: AuthenticatedUserRequest<{ messageId: string; chatId: string }>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const messageId = req.params.messageId;
   const chatId = req.params.chatId;
   try {
@@ -319,7 +322,10 @@ export async function deleteMessage(
     return res.status(200).json(deletedMessage);
   } catch (err) {
     //use this more in other mutations
-    if (err.code === "P2025") {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
       return res.status(404).json({
         message: "Message not found",
       });
@@ -329,11 +335,11 @@ export async function deleteMessage(
 }
 
 export async function getAllMessages(
-  req: AuthenticatedUserRequest<{ messageId: string; chatId: string }>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   try {
     const { read } = req.query;
     console.log(read);

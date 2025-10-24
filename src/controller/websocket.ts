@@ -1,6 +1,7 @@
 // services/messageService.ts
 
 import prisma from "../db/client.js";
+import { $Enums } from "../generated/prisma/index.js";
 
 //change typings later
 
@@ -11,6 +12,7 @@ export async function createMessageWS(
   message: string,
   type?: "GIF" | "TEXT",
 ): Promise<{
+  type: $Enums.MessageType;
   id: string;
   createdAt: Date;
   content: string;
@@ -18,7 +20,7 @@ export async function createMessageWS(
   read: boolean;
   sender: {
     username: string;
-    profilePicture: string;
+    profilePicture: string | null;
   };
 }> {
   if (!message) throw new Error("Message missing");
@@ -62,10 +64,11 @@ export async function deleteMessageWs(
 ): Promise<{
   createdAt: Date;
   content: string;
+  type: $Enums.MessageType;
   read: boolean;
   sender: {
     username: string;
-    profilePicture: string;
+    profilePicture: string | null;
   };
 }> {
   const deletedMessage = await prisma.message.update({

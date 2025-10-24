@@ -16,14 +16,13 @@ import gifsRouter from "./routes/gifs.js";
 import { createServer } from "http";
 import chatsRouter from "./routes/chats.js";
 import { Server as SocketServer } from "socket.io";
-import { websocketAuthMiddleware } from "./middleware/webSocketAuthMiddleware.js";
+import { websocketAuthMiddleware } from "./middleware/websocketAuthMiddleware.js";
 import { UserSocket } from "./types/types.js";
 import {
   createMessageWS,
   deleteMessageWs,
   getAllUserChatsIdWS,
 } from "./controller/websocket.js";
-import prisma from "./db/client.js";
 import { isAuthenticated } from "./middleware/authMiddleware.js";
 import { getSingleFileByFileName } from "./controller/uploadsController.js";
 
@@ -42,7 +41,7 @@ app.use(
 );
 
 //session middleware
-const redisStore = new connectRedis.RedisStore({
+const redisStore = new (connectRedis as any).RedisStore({
   client: redis,
 });
 
@@ -50,7 +49,7 @@ const redisStore = new connectRedis.RedisStore({
 app.use(
   session({
     store: redisStore,
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
     name: "session",
@@ -86,7 +85,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 export const server = createServer(app);
 server.listen(PORT, async () => {
-  //await prisma.user.deleteMany()
   console.log(chalk.green("Server is Running"));
 });
 
@@ -94,7 +92,7 @@ server.listen(PORT, async () => {
 //if using https without load balancer you have to give the cert paths to client and to server to upgrade to wss
 export const io = new SocketServer(server, {
   cors: {
-    origin: [process.env.CLIENT_ORIGIN],
+    origin: [process.env.CLIENT_ORIGIN!],
     credentials: true,
   },
   allowRequest: (req, callback) => {
@@ -117,6 +115,13 @@ io.use(websocketAuthMiddleware);
 //add logic so it only sends to correct users, right now it sends to everyone
 io.on("connection", async (socket: UserSocket) => {
   const userId = socket.userId;
+
+  if (!userId) {
+    console.error("Socket missing userId!");
+    console.log("User not authenticated for websocket connection");
+    socket.disconnect();
+    return;
+  }
   console.log(chalk.magenta("connected to ws: " + userId));
 
   //getting all chat ids
@@ -160,7 +165,9 @@ io.on("connection", async (socket: UserSocket) => {
           notifyUser({ status: "failed" });
         }
         console.error("Failed to send message:", err);
-        socket.emit("error", { message: err.message });
+        socket.emit("error", {
+          message: err instanceof Error ? err : new Error("Failure"),
+        });
       }
     },
   );
@@ -182,7 +189,9 @@ io.on("connection", async (socket: UserSocket) => {
           notifyUser({ status: "failed" });
         }
         console.error("Failed to delete message:", err);
-        socket.emit("error", { message: err.message });
+        socket.emit("error", {
+          message: err instanceof Error ? err : new Error("Failure"),
+        });
       }
     },
   );

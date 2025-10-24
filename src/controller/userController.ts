@@ -1,10 +1,10 @@
-import { NextFunction, Response, Request } from "express";
+import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
-import { AuthenticatedUserRequest } from "./postController.js";
 import { User } from "../generated/prisma/index.js";
 import fs from "fs/promises";
 import path from "path";
 import { v4 } from "uuid";
+import { AuthenticatedRequest } from "../types/types.js";
 
 export type UserWithFollowCount = User & {
   _count: {
@@ -25,7 +25,7 @@ export function createSafeUser(user: UserWithFollowCount): safeUser {
 }
 
 export async function getUserByUsername(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
@@ -52,12 +52,12 @@ export async function getUserByUsername(
 }
 
 export async function deleteUser(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
     const deletedUser = await prisma.user.delete({
       where: { id: userId },
       include: {
@@ -87,12 +87,12 @@ export async function deleteUser(
 }
 
 export async function updateUser(
-  req: AuthenticatedUserRequest<Partial<User>>,
+  req: AuthenticatedRequest<Partial<User>>,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
     const fieldsToUpdate = req.body;
     const file = req.file;
 
@@ -100,7 +100,7 @@ export async function updateUser(
 
     if (
       fieldsToUpdate.username &&
-      fieldsToUpdate.username !== req.user.username
+      fieldsToUpdate.username !== req.user?.username
     ) {
       const user = await prisma.user.findFirst({
         where: { username: fieldsToUpdate.username },
@@ -109,7 +109,7 @@ export async function updateUser(
         return res.status(400).json({ message: "Username already taken" });
     }
 
-    if (fieldsToUpdate.email && fieldsToUpdate.email !== req.user.email) {
+    if (fieldsToUpdate.email && fieldsToUpdate.email !== req.user?.email) {
       const user = await prisma.user.findFirst({
         where: {
           email: fieldsToUpdate.email,
@@ -133,7 +133,7 @@ export async function updateUser(
       });
 
       //delete old profilepic if exists
-      if (pathToDelete.profilePicture) {
+      if (pathToDelete && pathToDelete.profilePicture) {
         await fs.unlink(
           path.join(
             import.meta.dirname,
@@ -164,13 +164,15 @@ export async function updateUser(
 }
 
 export async function follow(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   //id is the one trying to follow the username so id has to be added to usernames followers
-  const followerId = req.user.id;
+  const followerId = req.user?.id;
   const username = req.params.username;
+
+  if (!followerId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const userToFollow = await prisma.user.findFirst({
@@ -234,12 +236,14 @@ export async function follow(
 }
 
 export async function unfollow(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const followerId = req.user.id;
+  const followerId = req.user?.id;
   const username = req.params.username;
+
+  if (!followerId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     //Username only works in this db model because it also has to be unique
@@ -301,7 +305,7 @@ export async function unfollow(
 }
 
 export async function getFollowers(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
@@ -332,7 +336,7 @@ export async function getFollowers(
 }
 
 export async function getFollowing(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
@@ -363,12 +367,12 @@ export async function getFollowing(
 }
 
 export async function searchUsers(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const username = req.params.username;
-  const userId = req.user.id;
+  const userId = req.user?.id;
 
   try {
     const users = await prisma.user.findMany({
@@ -401,11 +405,11 @@ export async function searchUsers(
 }
 
 export async function getFullUser(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const id = req.user.id;
+  const id = req.user?.id;
   console.log("hit new route");
 
   try {
@@ -424,12 +428,14 @@ export async function getFullUser(
 }
 
 export async function isFollowing(
-  req: AuthenticatedUserRequest<string>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const username = req.params.username; // user to check
-  const userId = req.user.id; // logged-in user
+  const userId = req.user?.id; // logged-in user
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     // Find the target userId

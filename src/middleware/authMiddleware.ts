@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import { AuthenticatedUserRequest } from "../controller/postController.js";
 import prisma from "../db/client.js";
 import {
   signupSchema,
@@ -7,6 +6,7 @@ import {
   editUserSchema,
 } from "../schemas/schemas.js";
 import { NextFunction, Response, Request } from "express";
+import { Params } from "../types/types.js";
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
   console.log(
@@ -56,11 +56,11 @@ export function isAuthenticated(
 }
 
 export async function isAuthorized(
-  req: AuthenticatedUserRequest<{}>,
+  req: Request<Partial<Params>>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const { commentId, postId, username, chatId, messageId } = req.params;
 
   console.log(chalk.yellow("Checking if user is authorized..."));
@@ -137,7 +137,7 @@ export async function isAuthorized(
 }
 
 export function validateEdit(
-  req: AuthenticatedUserRequest<{ username?: string; bio?: string }>,
+  req: Request<{ username?: string; bio?: string }>,
   res: Response,
   next: NextFunction,
 ) {

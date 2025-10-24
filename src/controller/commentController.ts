@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import prisma from "../db/client.js";
-import { AuthenticatedUserRequest } from "./postController.js";
 import { Comment } from "../generated/prisma/index.js";
+import { AuthenticatedRequest } from "../types/types.js";
 
 //update type later
 
@@ -39,12 +39,14 @@ function commentObjectStructure(
 }
 
 export async function getAllCommentsByPostId(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const postId = req.params.postId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const comments = await prisma.comment.findMany({
@@ -58,13 +60,15 @@ export async function getAllCommentsByPostId(
 }
 
 export async function getSingleCommentByPostIdAndCommentId(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const postId = req.params.postId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const commentId = req.params.commentId;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const comment = await prisma.comment.findFirst(
@@ -80,7 +84,7 @@ export async function getSingleCommentByPostIdAndCommentId(
 }
 
 export async function createComment(
-  req: AuthenticatedUserRequest<{
+  req: AuthenticatedRequest<{
     content: string;
     contentType?: "GIF" | "TEXT";
   }>,
@@ -88,8 +92,10 @@ export async function createComment(
   next: NextFunction,
 ) {
   const { postId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const { content, contentType } = req.body;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const comment = await prisma.comment.create({
@@ -109,12 +115,14 @@ export async function createComment(
 }
 
 export async function deleteComment(
-  req: AuthenticatedUserRequest<Comment>,
+  req: AuthenticatedRequest<Comment>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const commentId = req.params.commentId;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const deletedComment = await prisma.comment.delete({
@@ -128,13 +136,15 @@ export async function deleteComment(
 }
 
 export async function likeComment(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const postId = req.params.postId;
   const commentId = req.params.commentId;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const comment = await prisma.comment.findFirst({
@@ -161,13 +171,15 @@ export async function likeComment(
 }
 
 export async function dislikeComment(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const postId = req.params.postId;
   const commentId = req.params.commentId;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const comment = await prisma.comment.findFirst({

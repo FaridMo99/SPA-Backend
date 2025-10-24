@@ -1,15 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
-import { User } from "../generated/prisma/index.js";
 import { v4 } from "uuid";
 import path from "path";
 import fs from "fs/promises";
-
-export interface AuthenticatedUserRequest<T> extends Request {
-  user: User;
-  body: T;
-  file?: Express.Multer.File;
-}
+import { AuthenticatedRequest } from "../types/types.js";
 
 function postObjectStructure(userId: string) {
   const postObject = {
@@ -39,15 +33,17 @@ function postObjectStructure(userId: string) {
 }
 
 export async function createPost(
-  req: AuthenticatedUserRequest<{ content: string }>,
+  req: AuthenticatedRequest<{ content: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const content = req.body.content;
   const file = req.file;
 
-  let filePath: string;
+  let filePath: string = "";
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     if (file) {
@@ -89,12 +85,14 @@ export async function createPost(
 }
 
 export async function deletePost(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const postId = req.params.postId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const deletedPost = await prisma.post.delete({
@@ -122,12 +120,15 @@ export async function deletePost(
 }
 
 export async function like(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const postId = req.params.postId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+
   try {
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -155,12 +156,14 @@ export async function like(
 }
 
 export async function unlike(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   const postId = req.params.postId;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   try {
     const post = await prisma.post.findUnique({
@@ -189,13 +192,16 @@ export async function unlike(
 }
 
 export async function getPostByPostId(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const postId = req.params.postId;
-    const userId = req.user.id;
+    const userId = req.user?.id;
+
+    if (!userId) return res.status(401).json({ message: "Unauthroized" });
+
     const post = await prisma.post.findUnique({
       where: { id: postId },
       select: postObjectStructure(userId),
@@ -210,12 +216,15 @@ export async function getPostByPostId(
 }
 
 export async function getAllPostsByUsername(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const username = req.params.username;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+
   console.log("Hit get all posts by username username: " + username);
   try {
     const posts = await prisma.post.findMany({
@@ -236,11 +245,13 @@ export async function getAllPostsByUsername(
 }
 
 export async function getPostsByFollow(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   const limit = parseInt(req.query.limit as string) || 10;
   const page = parseInt(req.query.page as string) || 1;
@@ -268,11 +279,13 @@ export async function getPostsByFollow(
 }
 
 export async function getRandomPosts(
-  req: AuthenticatedUserRequest<{}>,
+  req: AuthenticatedRequest<{}>,
   res: Response,
   next: NextFunction,
 ) {
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) return res.status(401).json({ message: "Unauthroized" });
 
   const limit = parseInt(req.query.limit as string) || 10;
   const page = parseInt(req.query.page as string) || 1;

@@ -26,8 +26,7 @@ const verify: VerifyFunction = async (email, password, done) => {
     const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      //not specifying that only password is wrong,
-      //is on purpose for security reasons
+      //not specifying that only password is wrong is on purpose for security reasons
       return done(null, false, { message: "Email or Password is wrong" });
     }
 
@@ -38,7 +37,7 @@ const verify: VerifyFunction = async (email, password, done) => {
 };
 
 //store user id in session
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user, done) => {
   console.log("hit serialize user");
   console.log(chalk.bgRed(user));
   done(null, user.id);
