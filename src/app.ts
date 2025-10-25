@@ -45,6 +45,10 @@ const redisStore = new (connectRedis as any).RedisStore({
   client: redis,
 });
 
+
+//for renders load balancer
+app.set("trust proxy", 1);
+
 //adds req.session with properties i set up here
 app.use(
   session({
