@@ -1,7 +1,6 @@
 import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
 import { io } from "../app.js";
-import { Prisma } from "../generated/prisma/edge.js";
 import { AuthenticatedRequest } from "../types/types.js";
 
 //when chat deleted and created again shouldnt have a preview
@@ -321,15 +320,6 @@ export async function deleteMessage(
 
     return res.status(200).json(deletedMessage);
   } catch (err) {
-    //use this more in other mutations
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === "P2025"
-    ) {
-      return res.status(404).json({
-        message: "Message not found",
-      });
-    }
     next(err);
   }
 }
