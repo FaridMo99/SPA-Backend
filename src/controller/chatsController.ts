@@ -2,6 +2,70 @@ import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
 import { io } from "../app.js";
 import { AuthenticatedRequest } from "../types/types.js";
+import { $Enums } from "@prisma/client";
+
+//change later, rn just for ts to be silent
+type NewChat = {
+    id: string;
+    userOne: {
+        username: string;
+        profilePicture: string | null;
+    };
+    userTwo: {
+        username: string;
+        profilePicture: string | null;
+    };
+    messages: {
+        createdAt: Date;
+        read: boolean;
+        content: string;
+        type: $Enums.MessageType;
+        deleted: boolean;
+        sender: {
+            username: string;
+        };
+    }[];
+    _count: {
+        messages: number;
+    };
+}
+
+type ChatSortParam = {
+    id: string;
+    userOne: {
+        username: string;
+        profilePicture: string | null;
+    };
+    userTwo: {
+        username: string;
+        profilePicture: string | null;
+    };
+    messages: {
+        createdAt: Date;
+        read: boolean;
+        content: string;
+        type: $Enums.MessageType;
+        deleted: boolean;
+        sender: {
+            username: string;
+        };
+    }[];
+    _count: {
+        messages: number;
+    };
+}
+
+type ChatMessage = {
+  id: string;
+  createdAt: Date;
+  content: string;
+  type: $Enums.MessageType;
+  deleted: boolean;
+  sender: {
+    username: string;
+    profilePicture: string | null;
+  };
+};
 
 //when chat deleted and created again shouldnt have a preview
 export async function getAllUserChats(
@@ -56,14 +120,14 @@ export async function getAllUserChats(
     });
 
     //remove content when deleted is true
-    chats.forEach((chat) => {
+    chats.forEach((chat:NewChat) => {
       const firstMessage = chat.messages?.[0];
       if (firstMessage?.deleted) {
         firstMessage.content = "";
       }
     });
     //raw sql sorting would also be possible and performance wise better but then i would lose typesafety so i traded a little bit of performance for typesafety here
-    const sortedChats = chats.sort((a, b) => {
+    const sortedChats = chats.sort((a:ChatSortParam, b:ChatSortParam) => {
       const aLatest = a.messages[0]?.createdAt.getTime() ?? 0;
       const bLatest = b.messages[0]?.createdAt.getTime() ?? 0;
       return bLatest - aLatest;
@@ -217,7 +281,7 @@ export async function getSingleChatByChatId(
     if (!chat) return res.status(404).json({ message: "No Chat found" });
 
     //logic for when deleted messages included dont send content just the boolean
-    chat.messages.forEach((message, index) => {
+    chat.messages.forEach((message:ChatMessage, index:number) => {
       if (message.deleted) {
         chat.messages[index].content = "";
       }
@@ -240,14 +304,14 @@ export async function getSingleChatByChatId(
 
     if (chat.userOneId === userId && chat.deletedAtUserOne) {
       chat.messages = chat.messages.filter(
-        (message) =>
+        (message:ChatMessage) =>
           chat.deletedAtUserOne && message.createdAt > chat.deletedAtUserOne,
       );
     }
 
     if (chat.userTwoId === userId && chat.deletedAtUserTwo) {
       chat.messages = chat.messages.filter(
-        (message) =>
+        (message:ChatMessage) =>
           chat.deletedAtUserTwo && message.createdAt > chat.deletedAtUserTwo,
       );
     }
