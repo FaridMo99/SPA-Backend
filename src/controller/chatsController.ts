@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
 import { io } from "../app.js";
 import { AuthenticatedRequest } from "../types/types.js";
-import { $Enums } from "@prisma/client";
+import { $Enums } from "../generated/prisma/index.js";
 
 //change later, rn just for ts to be silent
 type NewChat = {
