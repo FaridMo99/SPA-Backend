@@ -1,7 +1,7 @@
 import Mailjet, {
   type SendEmailV3_1,
   type LibraryResponse,
-} from "node-mailjet";
+} from "node-mailjet"
 
 type UrlType = "verify-success" | "change-password";
 
