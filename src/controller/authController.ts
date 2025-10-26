@@ -70,14 +70,12 @@ export async function signup(
     const token = v4();
     await redis.setEx(`verifyUserId:${newUser.id}`, 86400, token);
 
-    const result = await sendVerificationEmail(
+    await sendVerificationEmail(
       newUser.email,
       "verify-success",
       token,
       newUser.id,
     );
-
-    console.log("Mailjet result:", result.body.Messages[0]);
 
     return res.status(200).json({ message: "success" });
   } catch (err) {
@@ -157,14 +155,12 @@ export async function sendEmailToChangePassword(
     const token = v4();
     await redis.setEx(`changePasswordUserId:${user.id}`, 86400, token);
 
-    const result = await sendVerificationEmail(
+    await sendVerificationEmail(
       emailAddress,
       "change-password",
       token,
       user.id,
     );
-
-    console.log("Mailjet result:", result.body.Messages[0]);
 
     return res.status(200).json({ message: "success" });
   } catch (err) {

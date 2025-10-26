@@ -1,7 +1,4 @@
-import Mailjet, {
-  type SendEmailV3_1,
-  type LibraryResponse,
-} from "node-mailjet"
+import Mailjet from "node-mailjet" 
 
 type UrlType = "verify-success" | "change-password";
 
@@ -18,7 +15,7 @@ export async function sendVerificationEmail(
   url: UrlType,
   token: string,
   userId: string,
-): Promise<LibraryResponse<SendEmailV3_1.Response>> {
+) {
   const clientOrigin = process.env.CLIENT_ORIGIN;
   const senderEmail = process.env.EMAIL_ADDRESS!;
   const senderName = `The ${clientOrigin} Team`;
@@ -57,7 +54,7 @@ export async function sendVerificationEmail(
 
   console.log("sending email");
 
-  const data: SendEmailV3_1.Body = {
+  const data = {
     Messages: [
       {
         From: {
@@ -76,7 +73,7 @@ export async function sendVerificationEmail(
     ],
   };
 
-  const request: LibraryResponse<SendEmailV3_1.Response> = await mailjet
+  const request = await mailjet
     .post("send", { version: "v3.1" })
     .request(data);
 
