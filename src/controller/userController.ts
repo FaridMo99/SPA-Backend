@@ -16,26 +16,25 @@ export type UserWithFollowCount = User & {
 export type safeUser = Omit<
   UserWithFollowCount,
   "password" | "email" | "birthdate" | "createdAt" | "id" | "verified"
-  >;
-
+>;
 
 //change later is just for now so ts is silent
-  type UserUser ={
-    _count: {
-        followers: number;
-        following: number;
-    };
+type UserUser = {
+  _count: {
+    followers: number;
+    following: number;
+  };
 } & {
-    id: string;
-    createdAt: Date;
-    username: string;
-    birthdate: Date;
-    email: string;
-    password: string;
-    verified: boolean;
-    profilePicture: string | null;
-    bio: string | null;
-}
+  id: string;
+  createdAt: Date;
+  username: string;
+  birthdate: Date;
+  email: string;
+  password: string;
+  verified: boolean;
+  profilePicture: string | null;
+  bio: string | null;
+};
 
 export function createSafeUser(user: UserWithFollowCount): safeUser {
   const { password, id, email, birthdate, createdAt, verified, ...safeUser } =
@@ -416,7 +415,7 @@ export async function searchUsers(
       take: 20,
     });
 
-    const safeUsers = users.map((u:UserUser) => createSafeUser(u));
+    const safeUsers = users.map((u: UserUser) => createSafeUser(u));
     return res.status(200).json(safeUsers);
   } catch (err) {
     next(err);

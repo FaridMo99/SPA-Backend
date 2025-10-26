@@ -7,9 +7,9 @@ import passport from "../lib/passportConfig.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import chalk from "chalk";
 import { createSafeUser, UserWithFollowCount } from "./userController.js";
-import { sendVerificationEmail } from "../lib/nodemailerConfigs.js";
 import redis from "../cache/redis.js";
 import { v4 } from "uuid";
+import { sendVerificationEmail } from "../lib/emailService.js";
 
 export async function login(
   req: Request<{}, {}, z.infer<typeof loginSchema>>,
@@ -69,12 +69,16 @@ export async function signup(
     //storing valid url in redis for 24 hours to verify email
     const token = v4();
     await redis.setEx(`verifyUserId:${newUser.id}`, 86400, token);
-    await sendVerificationEmail(
+
+    const result = await sendVerificationEmail(
       newUser.email,
       "verify-success",
       token,
       newUser.id,
     );
+
+    console.log("Mailjet result:", result.body.Messages[0]);
+
     return res.status(200).json({ message: "success" });
   } catch (err) {
     next(err);
@@ -133,7 +137,7 @@ export async function checkUser(
 }
 
 export async function sendEmailToChangePassword(
-  req: Request,
+  req: Request<{}, {}, { email: string }>,
   res: Response,
   next: NextFunction,
 ) {
@@ -153,12 +157,15 @@ export async function sendEmailToChangePassword(
     const token = v4();
     await redis.setEx(`changePasswordUserId:${user.id}`, 86400, token);
 
-    await sendVerificationEmail(
+    const result = await sendVerificationEmail(
       emailAddress,
       "change-password",
       token,
       user.id,
     );
+
+    console.log("Mailjet result:", result.body.Messages[0]);
+
     return res.status(200).json({ message: "success" });
   } catch (err) {
     next(err);
@@ -166,7 +173,7 @@ export async function sendEmailToChangePassword(
 }
 
 export async function verifyUser(
-  req: Request,
+  req: Request<{}, {}, { token: string; userId: string }>,
   res: Response,
   next: NextFunction,
 ) {
@@ -214,7 +221,7 @@ export async function verifyUser(
 }
 
 export async function changePassword(
-  req: Request,
+  req: Request<{}, {}, { token: string; userId: string; password: string }>,
   res: Response,
   next: NextFunction,
 ) {

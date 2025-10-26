@@ -45,7 +45,6 @@ const redisStore = new (connectRedis as any).RedisStore({
   client: redis,
 });
 
-
 //for renders load balancer
 app.set("trust proxy", 1);
 
