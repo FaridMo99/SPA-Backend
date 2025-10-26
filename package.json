@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "dev": "tsx watch ./src/app.ts",
-    "build": "npx prisma generate --schema ./src/prisma/schema.prisma && tsc",
+    "build": "npm install && npx prisma generate --schema ./src/prisma/schema.prisma && tsc",
     "prettier": "prettier --write .",
     "start": "node dist/app.js"
   },
@@ -27,6 +27,7 @@
     "node-mailjet": "^6.0.9",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "redis": "^5.9.0",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
@@ -41,6 +42,7 @@
     "@types/express-session": "^1.18.2",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.2.1",
+    "@types/node-mailjet": "^3.3.12",
     "@types/passport": "^1.0.17",
     "@types/passport-local": "^1.0.38",
     "@types/socket.io": "^3.0.1",
