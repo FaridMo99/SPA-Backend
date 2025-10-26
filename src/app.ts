@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
-    origin: [process.env.CLIENT_ORIGIN ?? "http://localhost:5173"],
+    origin: [process.env.CLIENT_ORIGIN!],
     credentials: true,
   }),
 );
@@ -60,7 +60,7 @@ app.use(
       secure: process.env.NODE_ENV === "dev" ? false : true,
       httpOnly: true,
       path: "/",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "lax",
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
   }),
