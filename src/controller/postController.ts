@@ -1,9 +1,7 @@
 import { NextFunction, Response } from "express";
 import prisma from "../db/client.js";
-import { v4 } from "uuid";
-import path from "path";
-import fs from "fs/promises";
 import { AuthenticatedRequest } from "../types/types.js";
+import { deleteCloudAsset, handleCloudUpload } from "../lib/fileHandlers.js";
 
 function postObjectStructure(userId: string) {
   const postObject = {
@@ -41,45 +39,26 @@ export async function createPost(
   const content = req.body.content;
   const file = req.file;
 
-  let filePath: string = "";
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
-    if (file) {
-      //create filename and get upload directory
-      const filename = `${v4()}-${file.originalname.replace(/\s+/g, "_")}`;
-      const uploadDir = path.join(import.meta.dirname, "../uploads");
 
-      //create path and write on disk
-      const fullPath = path.join(uploadDir, filename);
-      await fs.writeFile(fullPath, file.buffer);
-      filePath = `${process.env.BACKEND_URL}/uploads/${filename}`;
+    let fileUrl: string = "";
+    if (file) {
+      fileUrl = (await handleCloudUpload(file)).secure_url
     }
+
     const post = await prisma.post.create({
       data: {
         userId,
-        content: file ? filePath : content,
+        content: file ? fileUrl : content,
         type: file ? "IMAGE" : "TEXT",
       },
       select: postObjectStructure(userId),
     });
     return res.status(201).json(post);
   } catch (err) {
-    //delete image when creation failed
-    if (filePath) {
-      try {
-        const fullPath = path.join(
-          import.meta.dirname,
-          "../uploads",
-          filePath.split("/")[4],
-        );
-        await fs.unlink(fullPath);
-        console.log(`Deleted file: ${fullPath}`);
-      } catch (err) {
-        console.log("Failed to delete file: " + err);
-      }
-    }
     return next(err);
   }
 }
@@ -104,13 +83,7 @@ export async function deletePost(
 
     //delete image on disk if theres one
     if (deletedPost.type === "IMAGE") {
-      await fs.unlink(
-        path.join(
-          import.meta.dirname,
-          "../uploads",
-          deletedPost.content.split("/")[4],
-        ),
-      );
+      await deleteCloudAsset(deletedPost.content)
     }
 
     return res.status(200).json(deletedPost);

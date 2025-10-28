@@ -87,7 +87,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 export const server = createServer(app);
-server.listen(PORT, async () => {
+server.listen(PORT, () => {
   console.log(chalk.green("Server is Running"));
 });
 

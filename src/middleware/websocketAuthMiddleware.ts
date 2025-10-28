@@ -8,7 +8,9 @@ export async function websocketAuthMiddleware(
   socket: UserSocket,
   next: (err?: ExtendedError) => void,
 ) {
+  console.log("runs websocket auth")
   const signedCookie = socket.handshake.headers.cookie;
+  console.log(signedCookie)
   if (!signedCookie) return next(new Error("User not authenticated"));
 
   const parsedCookie = cookie.parse(signedCookie);
@@ -19,11 +21,13 @@ export async function websocketAuthMiddleware(
   const sessionId = signature.unsign(rawCookie, process.env.SESSION_SECRET!);
 
   try {
-    const sessionData = await redis.get(`sess:${sessionId}`);
 
+    const sessionData = await redis.get(`sess:${sessionId}`);
     if (!sessionData) return next(new Error("User not authenticated"));
+
     const userId = JSON.parse(sessionData as string).passport.user;
     socket.userId = userId;
+    
     if (!userId) return next(new Error("User not authenticated"));
     next();
   } catch (err) {

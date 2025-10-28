@@ -11,7 +11,8 @@ import {
   unlike,
 } from "../controller/postController.js";
 import { validateFile } from "../middleware/fileMiddleware.js";
-import { upload } from "./users.js";
+import { upload } from "../lib/fileHandlers.js";
+
 
 const postsRouter = Router();
 

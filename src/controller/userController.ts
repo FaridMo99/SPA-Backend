@@ -3,8 +3,8 @@ import prisma from "../db/client.js";
 import { User } from "../generated/prisma/index.js";
 import fs from "fs/promises";
 import path from "path";
-import { v4 } from "uuid";
 import { AuthenticatedRequest, safeUser, UserWithFollowCount } from "../types/types.js";
+import { deleteCloudAsset, handleCloudUpload } from "../lib/fileHandlers.js";
 
 
 export function createSafeUser(user: UserWithFollowCount): safeUser {
@@ -106,14 +106,8 @@ export async function updateUser(
     }
 
     if (file) {
-      //create filename and get upload directory
-      const filename = `${v4()}-${file.originalname.replace(/\s+/g, "_")}`;
-      const uploadDir = path.join(import.meta.dirname, "../uploads");
-
-      //create path and write on disk
-      const fullPath = path.join(uploadDir, filename);
-      await fs.writeFile(fullPath, file.buffer);
-      fieldsToUpdate.profilePicture = `${process.env.BACKEND_URL}/uploads/${filename}`;
+      const fileUrl = (await handleCloudUpload(file)).secure_url
+      fieldsToUpdate.profilePicture = fileUrl;
       const pathToDelete = await prisma.user.findUnique({
         where: { id: userId },
         select: { profilePicture: true },
@@ -121,17 +115,11 @@ export async function updateUser(
 
       //delete old profilepic if exists
       if (pathToDelete && pathToDelete.profilePicture) {
-        await fs.unlink(
-          path.join(
-            import.meta.dirname,
-            "../uploads",
-            pathToDelete.profilePicture.split("/")[4],
-          ),
-        );
+          await deleteCloudAsset(pathToDelete.profilePicture)
       }
     }
-
-    //update profile pic and delete old from disk
+ 
+    //update user
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { ...fieldsToUpdate },

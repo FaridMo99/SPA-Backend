@@ -16,13 +16,10 @@ import {
   unfollow,
   updateUser,
 } from "../controller/userController.js";
-import multer from "multer";
 import { validateFile } from "../middleware/fileMiddleware.js";
+import { upload } from "../lib/fileHandlers.js";
 
 const usersRouter = Router();
-
-//could become potential issue over time when theres a lot of traffic
-export const upload = multer({ storage: multer.memoryStorage() });
 
 usersRouter.get("/user", isAuthenticated, isAuthorized, getFullUser);
 
