@@ -85,7 +85,7 @@ export async function deleteMessageWs(
     },
     select: {
       deleted: true,
-      id:true,
+      id: true,
       createdAt: true,
       content: true,
       type: true,

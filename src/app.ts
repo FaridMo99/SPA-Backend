@@ -200,13 +200,8 @@ io.on("connection", async (socket: UserSocket) => {
   );
 
   socket.on("joinChat", (chatId: string) => {
-    console.log("joined chat")
+    console.log(chalk.blue("joined chat",chatId))
     socket.join(chatId);
-  });
-
-  socket.on("leaveChat", (chatId) => {
-    console.log("left chat")
-    socket.leave(chatId);
   });
 
   socket.on("disconnect", () => {

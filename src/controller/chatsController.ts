@@ -244,8 +244,7 @@ export async function deleteChat(
       where: { id: chatId },
       data: updateData,
     });
-
-    return res.status(204).end();
+    return res.status(200).json({id:updatedChat.id});
   } catch (err) {
     next(err);
   }
