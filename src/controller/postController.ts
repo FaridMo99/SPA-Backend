@@ -200,7 +200,7 @@ export async function getPostByPostId(
     const postId = req.params.postId;
     const userId = req.user?.id;
 
-    if (!userId) return res.status(401).json({ message: "Unauthroized" });
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -285,7 +285,7 @@ export async function getRandomPosts(
 ) {
   const userId = req.user?.id;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   const limit = parseInt(req.query.limit as string) || 10;
   const page = parseInt(req.query.page as string) || 1;
@@ -303,7 +303,3 @@ export async function getRandomPosts(
     return next(err);
   }
 }
-
-//interface type kinda wrong since not all get body, fix that
-//add likedby and if liked by the one requesting as fields, update type and return to user all fields
-//change to maybe only return arrays even if no item or only 1, in general look how to structure returns like message object etc.

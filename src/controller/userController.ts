@@ -4,42 +4,25 @@ import { User } from "../generated/prisma/index.js";
 import fs from "fs/promises";
 import path from "path";
 import { v4 } from "uuid";
-import { AuthenticatedRequest } from "../types/types.js";
+import { AuthenticatedRequest, safeUser, UserWithFollowCount } from "../types/types.js";
 
-export type UserWithFollowCount = User & {
-  _count: {
-    followers: number;
-    following: number;
-  };
-};
-
-export type safeUser = Omit<
-  UserWithFollowCount,
-  "password" | "email" | "birthdate" | "createdAt" | "id" | "verified"
->;
-
-//change later is just for now so ts is silent
-type UserUser = {
-  _count: {
-    followers: number;
-    following: number;
-  };
-} & {
-  id: string;
-  createdAt: Date;
-  username: string;
-  birthdate: Date;
-  email: string;
-  password: string;
-  verified: boolean;
-  profilePicture: string | null;
-  bio: string | null;
-};
 
 export function createSafeUser(user: UserWithFollowCount): safeUser {
   const { password, id, email, birthdate, createdAt, verified, ...safeUser } =
     user;
   return safeUser;
+}
+
+const UserFieldSelect = {
+  username: true,
+  bio: true,
+  profilePicture: true,
+  _count: {
+    select: {
+      followers: true,
+      following:true
+    }
+  }
 }
 
 export async function getUserByUsername(
@@ -51,19 +34,12 @@ export async function getUserByUsername(
   try {
     const user = await prisma.user.findFirst({
       where: { username },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect
     });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json(createSafeUser(user));
+    return res.status(200).json(user);
   } catch (err) {
     next(err);
   }
@@ -78,14 +54,7 @@ export async function deleteUser(
     const userId = req.user?.id;
     const deletedUser = await prisma.user.delete({
       where: { id: userId },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect
     });
 
     if (deletedUser.profilePicture) {
@@ -98,7 +67,7 @@ export async function deleteUser(
       );
     }
 
-    return res.status(200).json(createSafeUser(deletedUser));
+    return res.status(200).json(deletedUser);
   } catch (err) {
     next(err);
   }
@@ -166,16 +135,9 @@ export async function updateUser(
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { ...fieldsToUpdate },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect
     });
-    return res.status(200).json(createSafeUser(updatedUser));
+    return res.status(200).json(updatedUser);
   } catch (err) {
     next(err);
   }
@@ -231,14 +193,7 @@ export async function follow(
 
     const followedUser = await prisma.user.findUnique({
       where: { id: followingId },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect
     });
 
     if (!followedUser) {
@@ -247,7 +202,7 @@ export async function follow(
       });
     }
 
-    return res.status(201).json(createSafeUser(followedUser));
+    return res.status(201).json(followedUser);
   } catch (err) {
     next(err);
   }
@@ -301,14 +256,7 @@ export async function unfollow(
 
     const unfollowedUser = await prisma.user.findUnique({
       where: { id: followingId },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect
     });
 
     if (!unfollowedUser) {
@@ -316,7 +264,7 @@ export async function unfollow(
         message: "Unfollow successful, but unfollowed user not found",
       });
     }
-    return res.status(200).json(createSafeUser(unfollowedUser));
+    return res.status(200).json(unfollowedUser);
   } catch (err) {
     next(err);
   }
@@ -401,22 +349,14 @@ export async function searchUsers(
           mode: "insensitive",
         },
       },
-      include: {
-        _count: {
-          select: {
-            followers: true,
-            following: true,
-          },
-        },
-      },
+      select:UserFieldSelect,
       orderBy: {
         username: "desc",
       },
       take: 20,
     });
 
-    const safeUsers = users.map((u: UserUser) => createSafeUser(u));
-    return res.status(200).json(safeUsers);
+    return res.status(200).json(users);
   } catch (err) {
     next(err);
   }

@@ -46,7 +46,6 @@ passport.serializeUser((user, done) => {
 //attach user to req.body
 passport.deserializeUser(async (id: string, done) => {
   console.log("hit deserialize user");
-
   try {
     const user = await prisma.user.findUnique({
       where: { id },

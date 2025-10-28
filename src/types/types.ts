@@ -86,3 +86,17 @@ export type Params = {
   chatId: string;
   messageId: string;
 };
+
+export type UrlType = "verify-success" | "change-password";
+
+export type UserWithFollowCount = User & {
+  _count: {
+    followers: number;
+    following: number;
+  };
+};
+
+export type safeUser = Omit<
+  UserWithFollowCount,
+  "password" | "email" | "birthdate" | "createdAt" | "id" | "verified"
+>;

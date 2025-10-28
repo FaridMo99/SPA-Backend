@@ -31,5 +31,3 @@ export async function disconnectAllServices(reason: string, error?: Error) {
     process.exit(1);
   }
 }
-
-//add all services disconnect like also db and other

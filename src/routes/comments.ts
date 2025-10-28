@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, Router } from "express";
+import {  Router } from "express";
 import { isAuthenticated, isAuthorized } from "../middleware/authMiddleware.js";
 import {
   createComment,
@@ -47,6 +47,3 @@ commentsRouter.get("/:postId", isAuthenticated, getAllCommentsByPostId);
 commentsRouter.post("/:postId", isAuthenticated, createComment);
 
 export default commentsRouter;
-
-//add commenting with images/gifs
-//middleware for all routes to avoid duplicate code inside

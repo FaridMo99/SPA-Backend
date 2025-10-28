@@ -1,17 +1,8 @@
-// services/messageService.ts
-
 import prisma from "../db/client.js";
 import { $Enums } from "../generated/prisma/index.js";
 
-//change typings later
-
-//should auto add other user to chat again
-export async function createMessageWS(
-  senderId: string,
-  chatId: string,
-  message: string,
-  type?: "GIF" | "TEXT",
-): Promise<{
+//update frontend type
+type MessageType = {
   type: $Enums.MessageType;
   id: string;
   createdAt: Date;
@@ -22,7 +13,14 @@ export async function createMessageWS(
     username: string;
     profilePicture: string | null;
   };
-}> {
+};
+
+export async function createMessageWS(
+  senderId: string,
+  chatId: string,
+  message: string,
+  type?: "GIF" | "TEXT",
+): Promise<MessageType> {
   if (!message) throw new Error("Message missing");
 
   const newMessage = await prisma.message.create({
@@ -34,6 +32,7 @@ export async function createMessageWS(
       content: true,
       sender: { select: { username: true, profilePicture: true } },
       read: true,
+      chat:{select:{deletedByUserOne:true, deletedByUserTwo:true, id:true}}
     },
     data: {
       content: message,
@@ -43,7 +42,19 @@ export async function createMessageWS(
     },
   });
 
-  return newMessage;
+  if (newMessage.chat.deletedByUserOne || newMessage.chat.deletedByUserTwo) {
+    await prisma.chat.update({
+      where: { id: newMessage.chat.id },
+      data: {
+        ...(newMessage.chat.deletedByUserOne && { deletedByUserOne: false }),
+        ...(newMessage.chat.deletedByUserTwo && { deletedByUserTwo: false }),
+      },
+    });
+  }
+
+
+  const {chat, ...messageToReturn} = newMessage
+  return messageToReturn;
 }
 
 export async function getAllUserChatsIdWS(
@@ -61,16 +72,7 @@ export async function deleteMessageWs(
   chatId: string,
   messageId: string,
   userId: string,
-): Promise<{
-  createdAt: Date;
-  content: string;
-  type: $Enums.MessageType;
-  read: boolean;
-  sender: {
-    username: string;
-    profilePicture: string | null;
-  };
-}> {
+): Promise<MessageType> {
   const deletedMessage = await prisma.message.update({
     where: {
       id: messageId,
@@ -82,6 +84,8 @@ export async function deleteMessageWs(
       deleted: true,
     },
     select: {
+      deleted: true,
+      id:true,
       createdAt: true,
       content: true,
       type: true,

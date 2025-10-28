@@ -38,5 +38,3 @@ postsRouter.delete("/:postId", isAuthenticated, isAuthorized, deletePost);
 postsRouter.get("/:postId", isAuthenticated, getPostByPostId);
 
 export default postsRouter;
-
-//check schema with middleware

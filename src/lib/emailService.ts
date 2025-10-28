@@ -1,6 +1,5 @@
 import Mailjet from "node-mailjet" 
-
-type UrlType = "verify-success" | "change-password";
+import { UrlType } from "../types/types.js";
 
 const publicKey = process.env.MJ_APIKEY_PUBLIC;
 const privateKey = process.env.MJ_APIKEY_PRIVATE;

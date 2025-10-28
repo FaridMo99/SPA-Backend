@@ -3,7 +3,6 @@ import prisma from "../db/client.js";
 import { Comment } from "../generated/prisma/index.js";
 import { AuthenticatedRequest } from "../types/types.js";
 
-//update type later
 
 function commentObjectStructure(
   userId: string,
@@ -46,7 +45,7 @@ export async function getAllCommentsByPostId(
   const postId = req.params.postId;
   const userId = req.user?.id;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const comments = await prisma.comment.findMany({
@@ -68,7 +67,7 @@ export async function getSingleCommentByPostIdAndCommentId(
   const userId = req.user?.id;
   const commentId = req.params.commentId;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const comment = await prisma.comment.findFirst(
@@ -95,7 +94,7 @@ export async function createComment(
   const userId = req.user?.id;
   const { content, contentType } = req.body;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const comment = await prisma.comment.create({
@@ -122,7 +121,7 @@ export async function deleteComment(
   const userId = req.user?.id;
   const commentId = req.params.commentId;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const deletedComment = await prisma.comment.delete({
@@ -144,7 +143,7 @@ export async function likeComment(
   const postId = req.params.postId;
   const commentId = req.params.commentId;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const comment = await prisma.comment.findFirst({
@@ -179,7 +178,7 @@ export async function dislikeComment(
   const postId = req.params.postId;
   const commentId = req.params.commentId;
 
-  if (!userId) return res.status(401).json({ message: "Unauthroized" });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const comment = await prisma.comment.findFirst({

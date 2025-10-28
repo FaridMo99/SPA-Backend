@@ -4,7 +4,7 @@ import { io } from "../app.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import { $Enums } from "../generated/prisma/index.js";
 
-//change later, rn just for ts to be silent
+
 type NewChat = {
   id: string;
   userOne: {
@@ -67,7 +67,7 @@ type ChatMessage = {
   };
 };
 
-//when chat deleted and created again shouldnt have a preview
+
 export async function getAllUserChats(
   req: AuthenticatedRequest<{}>,
   res: Response,
@@ -85,7 +85,7 @@ export async function getAllUserChats(
           {
             userTwoId: userId,
             deletedByUserTwo: false,
-          },
+          }
         ],
       },
       select: {
@@ -139,7 +139,7 @@ export async function getAllUserChats(
   }
 }
 
-//check what to return, should return the same as get single chat
+
 export async function createChat(
   req: AuthenticatedRequest<{ userTwoUsername: string }>,
   res: Response,
@@ -158,7 +158,6 @@ export async function createChat(
     });
 
     if (!userTwo) {
-      console.log("3");
       return res.status(404).json({ message: "Second user not found" });
     }
 
@@ -180,8 +179,7 @@ export async function createChat(
       ((chat.userOneId === userOneId && !chat.deletedByUserOne) ||
         (chat.userTwoId === userOneId && !chat.deletedByUserTwo))
     ) {
-      console.log("1");
-      return res.status(200).json({ ...chat, alreadyExists: true });
+      return res.status(200).json({ id:chat.id, alreadyExists: true });
     }
 
     if (chat) {
@@ -201,7 +199,7 @@ export async function createChat(
         data: {
           userOne: { connect: { id: userOneId } },
           userTwo: { connect: { id: userTwoId } },
-        },
+        }
       });
     }
 
@@ -210,7 +208,8 @@ export async function createChat(
       chatId: chat.id,
     });
 
-    return res.status(201).json(chat);
+
+    return res.status(201).json({id:chat.id});
   } catch (err) {
     next(err);
   }
@@ -252,7 +251,7 @@ export async function deleteChat(
   }
 }
 
-//check what to return, should return the same as delete and create and get single chat
+
 export async function getSingleChatByChatId(
   req: AuthenticatedRequest<{ userTwoUsername: string }>,
   res: Response,
@@ -262,6 +261,18 @@ export async function getSingleChatByChatId(
   const userId = req.user?.id;
 
   try {
+    //logic for turning unread messages to read
+    const updatedMessages = await prisma.message.updateMany({
+      where: {
+        chatId: id,
+        NOT: { senderId: req.user?.id },
+        read: false,
+      },
+      data: {
+        read: true,
+      },
+    });
+
     const chat = await prisma.chat.findFirst({
       where: { id, OR: [{ userOneId: userId }, { userTwoId: userId }] },
       include: {
@@ -274,6 +285,7 @@ export async function getSingleChatByChatId(
             id: true,
             type: true,
           },
+          orderBy:{createdAt:"asc"}
         },
       },
     });
@@ -287,35 +299,25 @@ export async function getSingleChatByChatId(
       }
     });
 
-    //logic for turning unread messages to read
-    const updatedMessages = await prisma.message.updateMany({
-      where: {
-        chatId: id,
-        NOT: { senderId: req.user?.id },
-        read: false,
-      },
-      data: {
-        read: true,
-      },
-    });
-
     //logic for only sending messages after deletedby id and deletedat date
     // Filter messages after the user deleted the chat
-
     if (chat.userOneId === userId && chat.deletedAtUserOne) {
       chat.messages = chat.messages.filter(
         (message: ChatMessage) =>
-          chat.deletedAtUserOne && message.createdAt > chat.deletedAtUserOne,
+          chat.deletedAtUserOne && message.createdAt > chat.deletedAtUserOne
       );
     }
 
     if (chat.userTwoId === userId && chat.deletedAtUserTwo) {
       chat.messages = chat.messages.filter(
         (message: ChatMessage) =>
-          chat.deletedAtUserTwo && message.createdAt > chat.deletedAtUserTwo,
+          chat.deletedAtUserTwo && message.createdAt > chat.deletedAtUserTwo
       );
     }
-    return res.status(200).json(chat);
+
+    const { createdAt, userOneId, userTwoId, deletedAtUserOne, deletedAtUserTwo, deletedByUserOne, deletedByUserTwo, ...chatReturn } = chat
+    
+    return res.status(200).json(chatReturn);
   } catch (err) {
     next(err);
   }
@@ -381,6 +383,8 @@ export async function deleteMessage(
         read: true,
       },
     });
+    
+    deletedMessage.content = "";
 
     return res.status(200).json(deletedMessage);
   } catch (err) {
@@ -424,6 +428,8 @@ export async function getAllMessages(
           chat: { OR: [{ userOneId: userId }, { userTwoId: userId }] },
         },
       });
+
+      messages.forEach(message=> message.deleted ? message.content = "" : null)
       return res.status(200).json(messages);
     }
   } catch (err) {
